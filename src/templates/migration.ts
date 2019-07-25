@@ -1,4 +1,4 @@
-module.exports = async () => {
+export default `module.exports = async () => {
   return {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',
@@ -20,7 +20,7 @@ module.exports = async () => {
         useNewUrlParser: true
       }
     },
-    defaultTemplate: 'basic',
-    typescript: true
+    defaultTemplate: 'basic'
   };
 };
+`;

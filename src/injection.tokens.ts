@@ -39,6 +39,7 @@ export interface Config {
   changelogCollectionName: string;
   logger: LoggerConfig;
   defaultTemplate?: TemplateTypes;
+  typescript?: boolean;
 }
 
 export type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--fallback';

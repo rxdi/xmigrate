@@ -22,6 +22,7 @@ export class MigrationService {
     private migrationsResolver: MigrationsResolver,
     private logger: LogFactory
   ) {}
+
   async connect() {
     await this.ensureFolders();
     await this.database.mongooseConnect();
@@ -107,7 +108,7 @@ export class MigrationService {
     const db = await this.connect();
     if (lastAppliedItem) {
       try {
-        const migration = this.migrationsResolver.loadMigration(
+        const migration = await this.migrationsResolver.loadMigration(
           lastAppliedItem.fileName
         );
         result = await migration.down(db);
@@ -162,6 +163,12 @@ export class MigrationService {
       encoding: 'utf-8'
     });
     return fileName;
+  }
+
+  async init() {
+    await promisify(writeFile)('./xmigrate.js', templates.migration, {
+      encoding: 'utf-8'
+    });
   }
 
   async create({ name, template }) {

@@ -35,6 +35,7 @@ export interface Config {
     changelogCollectionName: string;
     logger: LoggerConfig;
     defaultTemplate?: TemplateTypes;
+    typescript?: boolean;
 }
 export declare type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--fallback';
 export declare const CommandInjector: InjectionToken<unknown>;

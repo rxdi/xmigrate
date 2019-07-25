@@ -15,6 +15,7 @@ export declare class MigrationService {
     up(): Promise<any[]>;
     down(): Promise<unknown>;
     createWithTemplate(template: TemplateTypes, name: string): Promise<string>;
+    init(): Promise<void>;
     create({ name, template }: {
         name: any;
         template: any;

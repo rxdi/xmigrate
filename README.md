@@ -3,6 +3,14 @@
 
 Migration library for `Mongodb` and `Mongoose` written in `typescript`
 
+* Rollback support
+* Typescript/Javascript compatible
+* Simple UI/UX
+* Templates for migrations
+* Mongoose and Mongodb compatability
+* Infinite Error log with Append streaming technique
+* `async`/`await` configuration loader
+
 ## Installation
 
 ```bash
@@ -10,6 +18,15 @@ npm i -g @rxdi/xmigrate
 ```
 
 ## Configuration
+
+Automatic configuration
+
+```bash
+xmigrate init
+```
+
+Manual configuration
+
 You can define `xmigrate.js` file where you execute command `xmigrate`
 
 ```typescript
@@ -17,6 +34,8 @@ module.exports = async () => {
   return {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',
+    defaultTemplate: 'basic',
+    typescript: true,
     logger: {
       folder: './migrations-log',
       up: {
@@ -35,12 +54,17 @@ module.exports = async () => {
         useNewUrlParser: true
       }
     },
-    defaultTemplate: 'basic'
   };
 };
 ```
 
 ## Commands
+
+#### First time run
+
+```bash
+xmigrate init
+```
 
 #### Creating migration
 
@@ -158,7 +182,7 @@ module.exports = {
 
 Typescript template
 
-Requires type definitions for `mongodb`
+(Optional) type definitions for `mongodb`
 
 ```bash
 npm install @types/mongodb -D
@@ -188,6 +212,17 @@ export = {
 };
 ```
 
+## Typescript migrations
+
+To be able to run Migrations with typescript you need to set `typescript: true` inside `xmigrate.js`
+
+This will run command internally when there is a `.ts` files inside the migrations directory:
+
+```bash
+npx gapi build --path=./your-migrations-dir/3414213131231312-migration.ts
+```
+
+After success build it will start `.js` transpiled file from `./dist/3414213131231312-migration.js`
 
 ## Fallback
 

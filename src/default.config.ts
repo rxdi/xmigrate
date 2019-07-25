@@ -15,7 +15,7 @@ export const DEFAULT_CONFIG: Config = {
     }
   },
   mongodb: {
-    url: `mongodb://localhost:27017`,
+    url: 'mongodb://localhost:27017',
     databaseName: 'test',
     options: {
       useNewUrlParser: true

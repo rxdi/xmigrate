@@ -45,7 +45,8 @@ export class MigrationsModule {
               ['up', migrationService.up],
               ['down', migrationService.down],
               ['status', migrationService.status],
-              ['create', migrationService.create]
+              ['create', migrationService.create],
+              ['init', migrationService.init],
             ];
             runner.setTasks(tasks);
             runner.bind(migrationService);

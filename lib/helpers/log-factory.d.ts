@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { LoggerConfig } from '../injection.tokens';
 import { WriteStream } from 'fs';
-declare class Logger {
+export declare class Logger {
     successLogger: WriteStream;
     errorLogger: WriteStream;
     constructor(successPath: string, errorPath: string);
@@ -26,4 +26,3 @@ export declare class LogFactory {
     has(name: string): boolean;
     get(name: string): Logger;
 }
-export {};

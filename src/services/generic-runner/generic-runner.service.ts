@@ -8,7 +8,7 @@ import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class GenericRunner {
-  tasks: Map<string, Function> = new Map();
+  private tasks: Map<string, Function> = new Map();
   constructor(
     private logger: LogFactory,
     private configService: ConfigService
@@ -17,6 +17,7 @@ export class GenericRunner {
   setTasks(tasks: any[]) {
     this.tasks = new Map(tasks);
   }
+
   async run(name: Tasks, args?: any) {
     await this.logEnvironment(name);
     const logger = this.logger.getDownLogger();
@@ -65,7 +66,7 @@ export class GenericRunner {
     }
   }
 
-  async fallback(fileName: string) {
+  private async fallback(fileName: string) {
     const response: ReturnType = {
       fileName
     } as any;
@@ -100,7 +101,7 @@ export class GenericRunner {
     return this;
   }
 
-  async logEnvironment(taskName: string) {
+  private async logEnvironment(taskName: string) {
     const {
       mongodb: { databaseName },
       migrationsDir,

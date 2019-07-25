@@ -3,7 +3,7 @@ import { LoggerConfig } from '../injection.tokens';
 
 import { createWriteStream, WriteStream } from 'fs';
 
-class Logger {
+export class Logger {
   successLogger: WriteStream;
   errorLogger: WriteStream;
   constructor(successPath: string, errorPath: string) {
