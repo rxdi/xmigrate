@@ -20,7 +20,7 @@ module.exports = async () => {
         useNewUrlParser: true
       }
     },
-    defaultTemplate: 'basic',
+    defaultTemplate: 'typescript',
     typescript: true
   };
 };

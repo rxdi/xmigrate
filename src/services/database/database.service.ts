@@ -1,6 +1,6 @@
 import { Injectable } from '@rxdi/core';
 import { MongoClient } from 'mongodb';
-import { connect, ConnectionOptions } from 'mongoose';
+import { connect } from 'mongoose';
 import { ConfigService } from '../config/config.service';
 
 @Injectable()
@@ -26,12 +26,12 @@ export class DatabaseService {
     )).db(databaseName);
   }
 
-  mongooseConnect(options?: ConnectionOptions) {
+  mongooseConnect() {
     return connect(
       `${this.configService.config.mongodb.url}/${
         this.configService.config.mongodb.databaseName
       }`,
-      options
+      this.configService.config.mongodb.options
     );
   }
 }

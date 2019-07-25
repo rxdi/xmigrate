@@ -8,7 +8,8 @@ Migration library for `Mongodb` and `Mongoose` written in `typescript`
 * Simple UI/UX
 * Templates for migrations
 * Mongoose and Mongodb compatability
-* Infinite Error log with Append streaming technique
+* Infinite Error log with `append` nodejs streaming technique
+* `error` and `success` logs for `up`/`down` migrations 
 * `async`/`await` configuration loader
 
 ## Installation
@@ -223,6 +224,12 @@ npx gapi build --path=./your-migrations-dir/3414213131231312-migration.ts
 ```
 
 After success build it will start `.js` transpiled file from `./dist/3414213131231312-migration.js`
+
+> Note: `typescript` migrations by default are a bit slower since the program need to transpile every single migration before processing it
+
+> Fix: you can transpile your migrations before run and put them inside `migrations` folder
+
+> Later: this library will handle effective transpiling of multiple `typescript` migrations
 
 ## Fallback
 
