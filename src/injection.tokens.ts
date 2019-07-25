@@ -41,7 +41,7 @@ export interface Config {
   defaultTemplate?: TemplateTypes;
 }
 
-export type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--falback';
+export type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--fallback';
 
 
 export const CommandInjector = new InjectionToken('CommandInjector');

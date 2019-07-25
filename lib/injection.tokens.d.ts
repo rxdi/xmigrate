@@ -36,5 +36,5 @@ export interface Config {
     logger: LoggerConfig;
     defaultTemplate?: TemplateTypes;
 }
-export declare type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--falback';
+export declare type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--fallback';
 export declare const CommandInjector: InjectionToken<unknown>;

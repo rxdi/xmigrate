@@ -71,7 +71,7 @@ xmigrate up
 #### Up migrations with fallback down to current errored migration
 
 ```bash
-xmigrate up fallback
+xmigrate up --fallback
 ```
 
 #### Down migrations
@@ -144,21 +144,14 @@ module.exports = {
 Mongoose driver template
 
 ```typescript
-const User = require('../server/models/user')
 
 module.exports = {
   async up () {
-    await User.updateOne(
-      { email: 'mymd@sink.sendgrid.net' },
-      { $set: { email: 'none' } }
-    )
+    return ['UP']
   },
 
   async down () {
-    await User.updateOne(
-      { email: 'none' },
-      { $set: { email: 'mymd@sink.sendgrid.net' } }
-    )
+    return ['DOWN']
   }
 }
 ```
@@ -196,6 +189,36 @@ export = {
 ```
 
 
+## Fallback
+
+When executing command `xmigrate up --falback` this will trigger immediate fallback to DOWN migration on the current crashed migration
+The log will look something like this:
+
+```
+🖥️  Database: test
+    
+💿  DBCollection: migrations
+    
+🗄️  LoggerDir: ./migrations-log
+    
+📁  MigrationsDir: migrations
+    
+👷  Script: xmigrate up
+    
+      
+🔥  Status: Operation executed with error
+🧨  Error: {"fileName":"20190725160011-pesho.js","migrated":[]}
+📨  Message: AAA
+      
+
+🙏  Status: Executing fallback operation xmigrate down
+📁  Migration: /migrations/20190725160011-pesho.js
+        
+
+🚀  Fallback operation success, nothing changed if written correctly!
+```
+
+
 ## Logs
 
 By default logs will append streaming content for every interaction made by migration
@@ -224,11 +247,6 @@ Down Migration Error log
 {
   "downgraded": [],
   "errorMessage": "AAA",
-  "result": [
-    {
-      "result": "DOWN Executed"
-    }
-  ],
   "fileName": "20190724235527-pesho.js"
 }
 ```

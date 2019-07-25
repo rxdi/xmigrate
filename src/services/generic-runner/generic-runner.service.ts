@@ -19,6 +19,7 @@ export class GenericRunner {
   }
   async run(name: Tasks, args?: any) {
     await this.logEnvironment(name);
+    const logger = this.logger.getDownLogger();
     if (!this.tasks.has(name)) {
       throw new Error('\n🔥  Missing command');
     }
@@ -42,7 +43,7 @@ export class GenericRunner {
         `);
       }
 
-      process.exit(0);
+      setTimeout(() => process.exit(0), 0);
     } catch (e) {
       console.error(`
       \n🔥  ${chalk.bold('Status: Operation executed with error')}
@@ -50,10 +51,17 @@ export class GenericRunner {
 📨  ${chalk.bold('Message: ' + e.message)}
       `);
       if (args && args.fallback) {
-        await this.fallback(e.fileName);
-        process.exit(0);
+        try {
+          await this.fallback(e.fileName);
+        } catch (err) {
+          console.log('\n🔥  Migration fallback exited with error  ', err);
+          logger.error({
+            errorMessage: err.message,
+            fileName: e.fileName
+          });
+        }
       }
-      process.exit(1);
+      setTimeout(() => process.exit(1), 0);
     }
   }
 
@@ -62,33 +70,25 @@ export class GenericRunner {
       fileName
     } as any;
     const logger = this.logger.getDownLogger();
-    try {
-      const { migrationsDir } = this.configService.config;
-      const migrationPath = normalize(
-        `${process.cwd()}/${migrationsDir}/${fileName}`
-      );
-      console.log(`
+    const { migrationsDir } = this.configService.config;
+    const migrationPath = normalize(
+      `${process.cwd()}/${migrationsDir}/${fileName}`
+    );
+    console.log(`
 \n🙏  ${chalk.bold('Status: Executing fallback operation')} ${chalk.red(
-        'xmigrate down'
-      )}
+      'xmigrate down'
+    )}
 📁  ${chalk.bold('Migration:')} ${migrationPath}
-        `);
-      response.appliedAt = new Date();
-      response.result = await require(migrationPath).down();
-      console.log(
-        `\n🚀  ${chalk.green(
-          'Fallback operation success, nothing changed if written correctly!'
-        )}`
-      );
-      logger.log(response);
-    } catch (err) {
-      console.log('\n🔥  Migration fallback exited with error  ', err);
-      logger.error({
-        errorMessage: err.message,
-        fileName
-      });
-      process.exit(1);
-    }
+      `);
+    response.appliedAt = new Date();
+    response.result = await require(migrationPath).down();
+    console.log(
+      `\n🚀  ${chalk.green(
+        'Fallback operation success, nothing changed if written correctly!'
+      )}`
+    );
+    logger.log(response);
+
     return response;
   }
 

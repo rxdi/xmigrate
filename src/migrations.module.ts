@@ -85,7 +85,7 @@ export class MigrationsModule {
             }
             if (command === 'up') {
               return runner.run(command, {
-                fallback: includes('--falback')
+                fallback: includes('--fallback')
               });
             }
             return runner.run(command);
