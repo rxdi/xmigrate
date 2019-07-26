@@ -1,4 +1,4 @@
-* v0.7.7
+* v0.7.8
 - Changed `db` to `client` since we are appending `MongoClient` instead of database
 - Supports for ACID transactions
 - Modified templates to fit new scenario
