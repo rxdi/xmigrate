@@ -3,6 +3,8 @@
 
 Migration library for `Mongodb` and `Mongoose` written in `typescript`
 
+## Features
+
 * Rollback support
 * Typescript/Javascript compatible
 * Simple UI/UX
@@ -35,7 +37,7 @@ module.exports = async () => {
   return {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',
-    defaultTemplate: 'basic',
+    defaultTemplate: 'es6',
     typescript: true,
     logger: {
       folder: './migrations-log',
@@ -75,10 +77,10 @@ xmigrate create "my-migration"
 
 #### Creating migration with template.
 
-Templates to choose: `basic`, `native`, `typescript`. By default `xmigrate create "my-migration"` executes `basic` template
+Templates to choose: `es5`, `es6`, `native`, `typescript`. By default `xmigrate create "my-migration"` executes with `es6` template
 
 ```bash
-xmigrate create "my-migration" --template (basic|native|typescript)
+xmigrate create "my-migration" --template (es5|es6|native|typescript)
 ```
 
 ```bash
@@ -93,10 +95,10 @@ Will execute all migrations which are with status `PENDING`
 xmigrate up
 ```
 
-#### Up migrations with fallback down to current errored migration
+#### Up migrations with rollback down to current errored migration
 
 ```bash
-xmigrate up --fallback
+xmigrate up --rollback
 ```
 
 #### Down migrations
@@ -141,7 +143,7 @@ When there is a `PENDING` flag these migrations where not runned against current
 
 ## Migration templates
 
-Native mongo driver template
+`Native` mongo driver template
 
 ```typescript
 module.exports = {
@@ -166,7 +168,7 @@ module.exports = {
 ```
 
 
-Mongoose driver template
+`ES5` template
 
 ```typescript
 
@@ -181,7 +183,18 @@ module.exports = {
 }
 ```
 
-Typescript template
+`ES6` template
+
+```typescript
+export async function up(db) {
+  return ['Up'];
+}
+export async function down(db) {
+  return ['Down'];
+}
+```
+
+`Typescript` template
 
 (Optional) type definitions for `mongodb`
 
@@ -190,27 +203,28 @@ npm install @types/mongodb -D
 ```
 
 ```typescript
+
 import { Db } from 'mongodb';
 
-export = {
-  async up(db: Db) {
-    await db
-      .collection('albums')
-      .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: true } });
-    await db
-      .collection('albums')
-      .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
-  },
+export async function up(db: Db) {
+  await db
+    .collection('albums')
+    .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: true } });
 
-  async down(db: Db) {
-    await db
-      .collection('albums')
-      .updateOne({ artist: 'The Doors' }, { $set: { stars: 0 } });
-    await db
-      .collection('albums')
-      .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: false } });
-  }
-};
+  await db
+    .collection('albums')
+    .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
+}
+
+export async function down(db: Db) {
+  await db
+    .collection('albums')
+    .updateOne({ artist: 'The Doors' }, { $set: { stars: 0 } });
+
+  await db
+    .collection('albums')
+    .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: false } });
+}
 ```
 
 ## Typescript migrations
@@ -231,9 +245,9 @@ After success build it will start `.js` transpiled file from `./dist/34142131312
 
 > Later: this library will handle effective transpiling of multiple `typescript` migrations
 
-## Fallback
+## Rallback
 
-When executing command `xmigrate up --falback` this will trigger immediate fallback to DOWN migration on the current crashed migration
+When executing command `xmigrate up --rollback` this will trigger immediate rollback to DOWN migration on the current crashed migration
 The log will look something like this:
 
 ```
@@ -253,11 +267,11 @@ The log will look something like this:
 📨  Message: AAA
       
 
-🙏  Status: Executing fallback operation xmigrate down
+🙏  Status: Executing rallback operation xmigrate down
 📁  Migration: /migrations/20190725160011-pesho.js
         
 
-🚀  Fallback operation success, nothing changed if written correctly!
+🚀  Rallback operation success, nothing changed if written correctly!
 ```
 
 

@@ -42,7 +42,7 @@ export interface Config {
   typescript?: boolean;
 }
 
-export type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--fallback';
+export type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--rollback';
 
 
 export const CommandInjector = new InjectionToken('CommandInjector');

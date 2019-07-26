@@ -3,6 +3,8 @@ import { Config } from './injection.tokens';
 export const DEFAULT_CONFIG: Config = {
   changelogCollectionName: 'migrations',
   migrationsDir: 'migrations',
+  defaultTemplate: 'es6',
+  typescript: true,
   logger: {
     folder: './migrations-log',
     up: {
@@ -20,6 +22,5 @@ export const DEFAULT_CONFIG: Config = {
     options: {
       useNewUrlParser: true
     }
-  },
-  defaultTemplate: 'basic'
+  }
 };

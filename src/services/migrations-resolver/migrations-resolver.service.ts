@@ -24,7 +24,7 @@ export class MigrationsResolver {
     if (this.isTypescript(fileName)) {
       return this.loadTsMigration(fileName);
     }
-    return require(this.getFilePath(fileName));
+    return require('esm')(module)(this.getFilePath(fileName));
   }
 
   getFilePath(fileName: string) {

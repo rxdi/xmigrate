@@ -1,17 +1,20 @@
-import { ReturnType, Tasks } from '../../injection.tokens';
+import { ReturnType, Tasks, MigrationSchema } from '../../injection.tokens';
 import { normalize } from 'path';
 import chalk from 'chalk';
 import { LogFactory } from '../../helpers/log-factory';
 import { Injectable } from '@rxdi/core';
 import { MigrationService } from '../migration/migration.service';
 import { ConfigService } from '../config/config.service';
+import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
 
 @Injectable()
 export class GenericRunner {
   private tasks: Map<string, Function> = new Map();
   constructor(
     private logger: LogFactory,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private resolver: MigrationsResolver,
+    private migrationService: MigrationService
   ) {}
 
   setTasks(tasks: any[]) {
@@ -20,7 +23,6 @@ export class GenericRunner {
 
   async run(name: Tasks, args?: any) {
     await this.logEnvironment(name);
-    const logger = this.logger.getDownLogger();
     if (!this.tasks.has(name)) {
       throw new Error('\n🔥  Missing command');
     }
@@ -51,12 +53,12 @@ export class GenericRunner {
 🧨  ${chalk.bold('Error: ' + JSON.stringify(e))}
 📨  ${chalk.bold('Message: ' + e.message)}
       `);
-      if (args && args.fallback) {
+      if (args && args.rollback) {
         try {
-          await this.fallback(e.fileName);
+          await this.rollback(e.fileName);
         } catch (err) {
-          console.log('\n🔥  Migration fallback exited with error  ', err);
-          logger.error({
+          console.log('\n🔥  Migration rollback exited with error  ', err);
+          this.logger.getDownLogger().error({
             errorMessage: err.message,
             fileName: e.fileName
           });
@@ -66,30 +68,38 @@ export class GenericRunner {
     }
   }
 
-  private async fallback(fileName: string) {
+  private async rollback(fileName: string) {
     const response: ReturnType = {
-      fileName
+      fileName,
+      appliedAt: new Date()
     } as any;
     const logger = this.logger.getDownLogger();
     const { migrationsDir } = this.configService.config;
     const migrationPath = normalize(
       `${process.cwd()}/${migrationsDir}/${fileName}`
     );
+
     console.log(`
-\n🙏  ${chalk.bold('Status: Executing fallback operation')} ${chalk.red(
+\n🙏  ${chalk.bold('Status: Executing rallback operation')} ${chalk.red(
       'xmigrate down'
     )}
 📁  ${chalk.bold('Migration:')} ${migrationPath}
       `);
+
+    let migration: MigrationSchema;
+    if (this.resolver.isTypescript(fileName)) {
+      migration = await this.resolver.loadTsMigration(fileName);
+    } else {
+      migration = require(migrationPath);
+    }
+    response.result = await migration.down(await this.migrationService.connect());
     response.appliedAt = new Date();
-    response.result = await require(migrationPath).down();
     console.log(
       `\n🚀  ${chalk.green(
-        'Fallback operation success, nothing changed if written correctly!'
+        'Rallback operation success, nothing changed if written correctly!'
       )}`
     );
     logger.log(response);
-
     return response;
   }
 
@@ -115,9 +125,7 @@ export class GenericRunner {
     )}
     \n🗄️  ${chalk.bold('LoggerDir:')} ${chalk.blue.bold(folder)}
     \n📁  ${chalk.bold('MigrationsDir:')} ${chalk.blue.bold(migrationsDir)}
-    \n👷  ${chalk.bold('Script:')} ${chalk.blue.bold(
-      `xmigrate ${taskName}`
-    )}
+    \n👷  ${chalk.bold('Script:')} ${chalk.blue.bold(`xmigrate ${taskName}`)}
     `);
   }
 }

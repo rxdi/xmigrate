@@ -12,6 +12,7 @@ import { nextOrDefault, includes } from './helpers/args-extractors';
 import { DEFAULT_CONFIG } from './default.config';
 import { join } from 'path';
 import { ConfigService } from './services/config/config.service';
+import { ensureDir } from './helpers';
 
 @Module()
 export class MigrationsModule {
@@ -21,11 +22,11 @@ export class MigrationsModule {
       providers: [
         GenericRunner,
         LogFactory,
+        ConfigService,
         {
           provide: Config,
           useValue: config
         },
-        ConfigService,
         {
           provide: LoggerConfig,
           useValue: config.logger
@@ -46,7 +47,7 @@ export class MigrationsModule {
               ['down', migrationService.down],
               ['status', migrationService.status],
               ['create', migrationService.create],
-              ['init', migrationService.init],
+              ['init', migrationService.init]
             ];
             runner.setTasks(tasks);
             runner.bind(migrationService);
@@ -78,6 +79,8 @@ export class MigrationsModule {
                 ) => Promise<Config>)(configService)
               );
             } catch (e) {}
+            await ensureDir(configService.config.logger.folder);
+            await ensureDir(configService.config.migrationsDir);
             if (command === 'create') {
               return runner.run(command, {
                 name: argv[1],
@@ -86,7 +89,7 @@ export class MigrationsModule {
             }
             if (command === 'up') {
               return runner.run(command, {
-                fallback: includes('--fallback')
+                rollback: includes('--rollback')
               });
             }
             return runner.run(command);

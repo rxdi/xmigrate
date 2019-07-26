@@ -1,6 +1,5 @@
 import { DatabaseService } from '../database/database.service';
 import { Injectable } from '@rxdi/core';
-import { ensureDir } from '../../helpers/ensure-folder';
 import { ReturnType } from '../../injection.tokens';
 import { promisify } from 'util';
 import { writeFile } from 'fs';
@@ -24,14 +23,8 @@ export class MigrationService {
   ) {}
 
   async connect() {
-    await this.ensureFolders();
     await this.database.mongooseConnect();
     return this.database.connect();
-  }
-
-  async ensureFolders() {
-    await ensureDir(this.configService.config.logger.folder);
-    await ensureDir(this.configService.config.migrationsDir);
   }
 
   async up() {
@@ -39,7 +32,7 @@ export class MigrationService {
     const pendingItems = statusItems.filter(
       item => item.appliedAt === 'PENDING'
     );
-    const migrated = [];
+    const migrated: ReturnType[] = [];
 
     const db = await this.connect();
 
@@ -96,7 +89,7 @@ export class MigrationService {
   }
 
   async down() {
-    const downgraded = [];
+    const downgraded: ReturnType[] = [];
     const statusItems = await this.statusInternal();
     const appliedItems = statusItems.filter(
       item => item.appliedAt !== 'PENDING'
@@ -172,7 +165,6 @@ export class MigrationService {
   }
 
   async create({ name, template }) {
-    await this.ensureFolders();
     const customTemplate =
       template || this.configService.config.defaultTemplate;
     const fileName = await this.createWithTemplate(customTemplate, name);

@@ -37,5 +37,5 @@ export interface Config {
     defaultTemplate?: TemplateTypes;
     typescript?: boolean;
 }
-export declare type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--fallback';
+export declare type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--rollback';
 export declare const CommandInjector: InjectionToken<unknown>;

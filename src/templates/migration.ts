@@ -2,6 +2,8 @@ export default `module.exports = async () => {
   return {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',
+    defaultTemplate: 'es6',
+    typescript: true,
     logger: {
       folder: './migrations-log',
       up: {
@@ -20,7 +22,6 @@ export default `module.exports = async () => {
         useNewUrlParser: true
       }
     },
-    defaultTemplate: 'basic'
   };
 };
 `;
