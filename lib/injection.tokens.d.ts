@@ -1,5 +1,5 @@
 import { InjectionToken } from '@rxdi/core';
-import { Db } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { TemplateTypes } from './templates';
 export interface ReturnType {
     appliedAt: Date | string;
@@ -9,8 +9,8 @@ export interface ReturnType {
 export declare const LoggerConfig: InjectionToken<unknown>;
 export declare const Config: InjectionToken<unknown>;
 export declare type MigrationSchema = {
-    down: (db: Db) => unknown;
-    up: (db: Db) => unknown;
+    down: (db: MongoClient) => unknown;
+    up: (db: MongoClient) => unknown;
 };
 export interface LoggerConfig {
     folder: string;

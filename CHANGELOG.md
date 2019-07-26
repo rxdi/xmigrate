@@ -1,4 +1,9 @@
 * v0.7.7
+- Changed `db` to `client` since we are appending `MongoClient` instead of database
+- Supports for ACID transactions
+- Modified templates to fit new scenario
+
+* v0.7.7
 - Added `typescript` support on Rollbacked migration
 - Added `es6` and `es5` modules. Removed `basic` template naming
 - Fallback changed to Rollback `xmigrate up --rollback` instead of `xmigrate up --fallback`

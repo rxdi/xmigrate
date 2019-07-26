@@ -19,11 +19,13 @@ export class DatabaseService {
           'See https://github.com/seppevs/migrate-mongo#initialize-a-new-project'
       );
     }
-
-    return (await MongoClient.connect(
+    const client = await MongoClient.connect(
       url,
       this.configService.config.mongodb.options
-    )).db(databaseName);
+    );
+    const originalDb = client.db.bind(client);
+    client.db = (dbName: string) => originalDb(dbName || databaseName);
+    return client;
   }
 
   mongooseConnect() {

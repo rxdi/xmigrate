@@ -10,7 +10,7 @@ export declare class MigrationService {
     private migrationsResolver;
     private logger;
     constructor(configService: ConfigService, database: DatabaseService, migrationsResolver: MigrationsResolver, logger: LogFactory);
-    connect(): Promise<import("mongodb").Db>;
+    connect(): Promise<import("mongodb").MongoClient>;
     up(): Promise<ReturnType[]>;
     down(): Promise<unknown>;
     createWithTemplate(template: TemplateTypes, name: string): Promise<string>;

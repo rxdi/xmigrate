@@ -1,10 +1,10 @@
 export default `
 module.exports = {
-  async up (db) {
+  async up (client) {
     return ['Up']
   },
 
-  async down (db) {
+  async down (client) {
     return ['Down']
   }
 }

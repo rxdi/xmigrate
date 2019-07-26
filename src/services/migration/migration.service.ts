@@ -34,7 +34,7 @@ export class MigrationService {
     );
     const migrated: ReturnType[] = [];
 
-    const db = await this.connect();
+    const client = await this.connect();
 
     const logger = this.logger.getUpLogger();
 
@@ -44,7 +44,7 @@ export class MigrationService {
         const migration = await this.migrationsResolver.loadMigration(
           item.fileName
         );
-        result = await migration.up(db);
+        result = await migration.up(client);
       } catch (err) {
         const error = new ErrorMap(err.message);
         error.fileName = item.fileName;
@@ -56,7 +56,7 @@ export class MigrationService {
         });
         throw error;
       }
-      const collection = db.collection(
+      const collection = client.db().collection(
         this.configService.config.changelogCollectionName
       );
       const { fileName } = item;
@@ -98,13 +98,13 @@ export class MigrationService {
     let result: unknown;
 
     const logger = this.logger.getDownLogger();
-    const db = await this.connect();
+    const client = await this.connect();
     if (lastAppliedItem) {
       try {
         const migration = await this.migrationsResolver.loadMigration(
           lastAppliedItem.fileName
         );
-        result = await migration.down(db);
+        result = await migration.down(client);
       } catch (err) {
         const error = new ErrorMap(err.message);
         error.fileName = lastAppliedItem.fileName;
@@ -116,7 +116,7 @@ export class MigrationService {
         });
         throw error;
       }
-      const collection = db.collection(
+      const collection = client.db().collection(
         this.configService.config.changelogCollectionName
       );
       try {
@@ -180,8 +180,8 @@ export class MigrationService {
 
   private async statusInternal() {
     const fileNames = await this.migrationsResolver.getFileNames();
-    const db = await this.connect();
-    const collection = db.collection<ReturnType>(
+    const client = await this.connect();
+    const collection = client.db().collection<ReturnType>(
       this.configService.config.changelogCollectionName
     );
     const changelog = await collection.find({}).toArray();
