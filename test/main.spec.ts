@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { Config, LoggerConfig, CommandInjector } from '../src/injection.tokens';
+import { Config, LoggerConfig } from '../src/injection.tokens';
 import { DEFAULT_CONFIG } from '../src/default.config';
 import { MigrationsResolver } from '../src/services/migrations-resolver/migrations-resolver.service';
 import { createTestBed, Container } from '@rxdi/core';
@@ -41,18 +41,20 @@ export async function down(client: MongoClient) {
 }
 `;
 
-const FakeClient = (response: unknown) => ({
-  db: () => ({
-    collection: () => ({
-      insertOne: () => null,
-      find: () => ({ toArray: () => [] }),
-      updateOne: () => ({ response }),
-      deleteOne: () => ({ response })
+function FakeMongoClient(response: unknown) {
+  return {
+    db: () => ({
+      collection: () => ({
+        insertOne: () => null,
+        find: () => ({ toArray: () => [] }),
+        updateOne: () => ({ response }),
+        deleteOne: () => ({ response })
+      })
     })
-  })
-});
+  };
+}
 
-describe('Global Server Tests', () => {
+describe('Global Xmigrate Tests', () => {
   const config: Config = DEFAULT_CONFIG;
   let migrationResolver: MigrationsResolver;
   let databaseService: DatabaseService;
@@ -72,7 +74,7 @@ describe('Global Server Tests', () => {
     await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeClient(response)
+      FakeMongoClient(response)
     );
     const res = await migration[type](await databaseService.connect());
     expect(res['response']).toEqual(response);
@@ -103,6 +105,35 @@ describe('Global Server Tests', () => {
     );
   }
 
+  async function StartMigration(type: 'up' | 'down') {
+    const filePath = await migrationService.createWithTemplate(
+      template as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+      FakeMongoClient({ up: true })
+    );
+
+    const [file] = await migrationResolver.getFileNames();
+    const fakeMigration = [
+      {
+        fileName: file,
+        appliedAt: type === 'up' ? 'PENDING' : new Date(),
+        result: { up: true }
+      }
+    ];
+    const spyStatus = spyOn(migrationService, 'statusInternal').and.callFake(
+      () => fakeMigration
+    );
+    expect(migrationResolver.getRelativePath(file)).toEqual(filePath);
+    const [item] = await migrationService[type]();
+    expect(spy).toHaveBeenCalled();
+    expect(spyStatus).toHaveBeenCalled();
+    expect(item.fileName).toEqual(fakeMigration[0].fileName);
+    expect(item.result.response).toEqual(fakeMigration[0].result);
+  }
+
   beforeAll(async () => {
     await ensureDir('./migrations');
     await ensureDir('./migrations-log');
@@ -125,35 +156,6 @@ describe('Global Server Tests', () => {
         {
           provide: LoggerConfig,
           useValue: config.logger
-        },
-        {
-          provide: 'set-tasks',
-          deps: [GenericRunner, MigrationService],
-          useFactory: async (
-            runner: GenericRunner,
-            migrationService: MigrationService
-          ) => {
-            const tasks = [
-              ['up', migrationService.up],
-              ['down', migrationService.down],
-              ['status', migrationService.status],
-              ['create', migrationService.create],
-              ['init', migrationService.init]
-            ];
-            runner.setTasks(tasks);
-            runner.bind(migrationService);
-            return tasks;
-          }
-        },
-        {
-          provide: CommandInjector,
-          useFactory: () => {
-            const [, , ...args] = process.argv;
-            return {
-              command: args[0],
-              argv: args
-            };
-          }
         }
       ]
     });
@@ -203,53 +205,9 @@ describe('Global Server Tests', () => {
   it('Should create migration and run DOWN', async () =>
     await TestMigration('down', false));
 
-  it('Should create migration and test complete flow UP migration', async () => {
-    const filePath = await migrationService.createWithTemplate(
-      template as 'typescript',
-      'pesho1234',
-      { raw: true, typescript: true }
-    );
-    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeClient({ up: true })
-    );
+  it('Should create migration and test complete flow UP migration', async () =>
+    StartMigration('up'));
 
-    const [file] = await migrationResolver.getFileNames();
-    const fakeMigration = [
-      { fileName: file, appliedAt: 'PENDING', result: { up: true } }
-    ];
-    const spyStatus = spyOn(migrationService, 'statusInternal').and.callFake(
-      () => fakeMigration
-    );
-    expect(migrationResolver.getRelativePath(file)).toEqual(filePath);
-    const [item] = await migrationService.up();
-    expect(spy).toHaveBeenCalled();
-    expect(spyStatus).toHaveBeenCalled();
-    expect(item.fileName).toEqual(fakeMigration[0].fileName);
-    expect(item.result.response).toEqual(fakeMigration[0].result);
-  });
-
-  it('Should create migration and test complete flow DOWN migration', async () => {
-    const filePath = await migrationService.createWithTemplate(
-      template as 'typescript',
-      'pesho1234',
-      { raw: true, typescript: true }
-    );
-    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeClient({ down: true })
-    );
-
-    const [file] = await migrationResolver.getFileNames();
-    const fakeMigration = [
-      { fileName: file, appliedAt: new Date(), result: { down: true } }
-    ];
-    const spyStatus = spyOn(migrationService, 'statusInternal').and.callFake(
-      () => fakeMigration
-    );
-    expect(migrationResolver.getRelativePath(file)).toEqual(filePath);
-    const [item] = await migrationService.down();
-    expect(spy).toHaveBeenCalled();
-    expect(spyStatus).toHaveBeenCalled();
-    expect(item.fileName).toEqual(fakeMigration[0].fileName);
-    expect(item.result.response).toEqual(fakeMigration[0].result);
-  });
+  it('Should create migration and test complete flow DOWN migration', async () =>
+    StartMigration('down'));
 });
