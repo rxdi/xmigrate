@@ -6,6 +6,7 @@
 - Tests for specific scenarios added
 - Modified `createWithTemplate` method inside `MigrationService` to return value with `/` instead of empty line since it was breaking consistency
 - Introduced inside tests(For now) custom template providing string example: `xmigrate create mytemplate --typescript true --raw true --template 'oh my god i have a template'` later in version v0.7.14 will have this capabilities
+- ES6 Configuration file can be loaded with `export default async function() {}` syntax
 
 * v0.7.8
 - Changed `db` to `client` since we are appending `MongoClient` instead of database

@@ -10,7 +10,6 @@ import {
 import { MigrationService } from './services/migration/migration.service';
 import { nextOrDefault, includes } from './helpers/args-extractors';
 import { DEFAULT_CONFIG } from './default.config';
-import { join } from 'path';
 import { ConfigService } from './services/config/config.service';
 import { ensureDir } from './helpers';
 
@@ -73,11 +72,13 @@ export class MigrationsModule {
             configService: ConfigService
           ) => {
             try {
-              configService.set(
-                await (require(join(process.cwd(), 'xmigrate.js')) as (
-                  configService: ConfigService
-                ) => Promise<Config>)(configService)
-              );
+              let settings = require('esm')(module)('./xmigrate');
+              if (settings.default) {
+                settings = await (settings as { default: () => Promise<Config> }).default();
+              } else {
+                settings = (await (settings as Function)()) as Config;
+              }
+              configService.set(settings as Config);
             } catch (e) {}
             await ensureDir(configService.config.logger.folder);
             await ensureDir(configService.config.migrationsDir);

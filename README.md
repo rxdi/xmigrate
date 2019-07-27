@@ -37,7 +37,7 @@ Manual configuration
 You can define `xmigrate.js` file where you execute command `xmigrate`
 
 ```typescript
-module.exports = async () => {
+export default async () => {
   return {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',

@@ -28,13 +28,13 @@ export interface Config {
         url: string;
         databaseName: string;
         options: {
-            useNewUrlParser: true;
+            useNewUrlParser: boolean;
         };
     };
     outDir: string;
-    migrationsDir: string;
-    changelogCollectionName: string;
-    logger: LoggerConfig;
+    migrationsDir?: string;
+    changelogCollectionName?: string;
+    logger?: LoggerConfig;
     defaultTemplate?: TemplateTypes;
     typescript?: boolean;
 }

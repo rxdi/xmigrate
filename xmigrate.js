@@ -1,16 +1,11 @@
-module.exports = async () => {
+export default async () => {
   return {
-    changelogCollectionName: 'migrations',
-    migrationsDir: 'migrations',
     defaultTemplate: 'typescript',
     outDir: 'dist',
     typescript: true,
-    logger: {
-      folder: 'migrations-log'
-    },
     mongodb: {
       url: 'mongodb://localhost:27017',
-      databaseName: 'testdd',
+      databaseName: 'tesd',
       options: {
         useNewUrlParser: true
       }
