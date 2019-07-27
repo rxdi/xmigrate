@@ -1,3 +1,7 @@
+* v0.7.13
+- Full typescript support! Files are Transpiled using ParcelJS insternally inside `@gapi/cli`
+- 500 Migrations run with Typescript > Javascript > Execution in 13 seconds!
+
 * v0.7.8
 - Changed `db` to `client` since we are appending `MongoClient` instead of database
 - Supports for ACID transactions

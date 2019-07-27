@@ -2,7 +2,7 @@ module.exports = async () => {
   return {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',
-    defaultTemplate: 'es6',
+    defaultTemplate: 'typescript',
     typescript: true,
     logger: {
       folder: './migrations-log',

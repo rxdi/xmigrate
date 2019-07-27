@@ -5,14 +5,16 @@ Migration library for `Mongodb` and `Mongoose` written in `typescript`
 
 ## Features
 
-* Rollback support
-* Typescript/Javascript compatible
 * Simple UI/UX
+* Rollback support
 * Templates for migrations
-* Mongoose and Mongodb compatability
-* Infinite Error log with `append` nodejs streaming technique
-* `error` and `success` logs for `up`/`down` migrations 
+* Typescript/Javascript compatible
 * `async`/`await` configuration loader
+* Mongoose and Mongodb compatability
+* ACID Transactions provided by MongoDB
+* `error` and `success` logs for `up`/`down` migrations 
+* Infinite Error log with `append` nodejs streaming technique
+* 100% Typescript support with JIT Compilation provided by [@gapi/cli](https://github.com/Stradivario/gapi-cli) and [ParcelJS](https://parceljs.org)
 
 ## Installation
 
@@ -198,10 +200,10 @@ export async function down(client) {
 
 `Typescript` template
 
-(Optional) type definitions for `mongodb`
+(Optional) type definitions for `mongodb` and `mongoose`
 
 ```bash
-npm install @types/mongodb -D
+npm install @types/mongodb @types/mongoose -D
 ```
 
 ```typescript
@@ -231,21 +233,20 @@ export async function down(client: MongoClient) {
 
 ## Typescript migrations
 
-To be able to run Migrations with typescript you need to set `typescript: true` inside `xmigrate.js`
+To be able to run Migrations with typescript you need to set `typescript: true` inside `xmigrate.js` and install `@gapi/cli` globally
 
-This will run command internally when there is a `.ts` files inside the migrations directory:
+Install `@gapi/cli` for runtime build using `glob`
 
 ```bash
-npx gapi build --path=./your-migrations-dir/3414213131231312-migration.ts
+npm i -g @gapi/cli
 ```
 
-After success build it will start `.js` transpiled file from `./dist/3414213131231312-migration.js`
-
-> Note: `typescript` migrations by default are a bit slower since the program need to transpile every single migration before processing it
-
-> Fix: you can transpile your migrations before run and put them inside `migrations` folder
-
-> Later: this library will handle effective transpiling of multiple `typescript` migrations
+Command that will be runned internally
+```bash
+npx gapi build --glob ./1-migration.ts,./2-migration.ts
+```
+After success transpiled migration will be started from `./dist/1-migration.js`
+Before exit script will remove `artifacts` left from transpilation located inside `./dist` folder
 
 ## Rallback
 

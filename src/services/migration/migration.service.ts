@@ -37,7 +37,12 @@ export class MigrationService {
     const client = await this.connect();
 
     const logger = this.logger.getUpLogger();
-
+    const typescriptMigrations = pendingItems
+      .filter(item => this.migrationsResolver.isTypescript(item.fileName))
+      .map(m => m.fileName);
+    if (typescriptMigrations.length) {
+      await this.migrationsResolver.transpileMigrations(typescriptMigrations);
+    }
     const migrateItem = async (item: ReturnType) => {
       let result: unknown;
       try {
@@ -56,9 +61,9 @@ export class MigrationService {
         });
         throw error;
       }
-      const collection = client.db().collection(
-        this.configService.config.changelogCollectionName
-      );
+      const collection = client
+        .db()
+        .collection(this.configService.config.changelogCollectionName);
       const { fileName } = item;
       const appliedAt = new Date();
 
@@ -84,22 +89,37 @@ export class MigrationService {
     for (const item of pendingItems) {
       await migrateItem(item);
     }
+    await this.migrationsResolver.clean(typescriptMigrations);
     this.printStatus(migrated);
     return migrated;
   }
 
   async down() {
+
+
     const downgraded: ReturnType[] = [];
     const statusItems = await this.statusInternal();
     const appliedItems = statusItems.filter(
       item => item.appliedAt !== 'PENDING'
     );
-    const lastAppliedItem = appliedItems[appliedItems.length - 1];
-    let result: unknown;
 
-    const logger = this.logger.getDownLogger();
-    const client = await this.connect();
-    if (lastAppliedItem) {
+    const lastAppliedItem = appliedItems[appliedItems.length - 1];
+    if (!lastAppliedItem) {
+      return;
+    }
+    const isTypescript = this.migrationsResolver.isTypescript(
+      lastAppliedItem.fileName
+    );
+    let result: unknown;
+    if (appliedItems.length && lastAppliedItem) {
+      const logger = this.logger.getDownLogger();
+      const client = await this.connect();
+
+      if (isTypescript) {
+        await this.migrationsResolver.transpileMigrations([
+          lastAppliedItem.fileName
+        ]);
+      }
       try {
         const migration = await this.migrationsResolver.loadMigration(
           lastAppliedItem.fileName
@@ -116,9 +136,9 @@ export class MigrationService {
         });
         throw error;
       }
-      const collection = client.db().collection(
-        this.configService.config.changelogCollectionName
-      );
+      const collection = client
+        .db()
+        .collection(this.configService.config.changelogCollectionName);
       try {
         await collection.deleteOne({ fileName: lastAppliedItem.fileName });
         const res: ReturnType = {
@@ -136,6 +156,9 @@ export class MigrationService {
         });
         throw new Error(`Could not update changelog: ${err.message}`);
       }
+    }
+    if (lastAppliedItem) {
+      await this.migrationsResolver.clean([lastAppliedItem.fileName]);
     }
     this.printStatus(downgraded);
     return result;
@@ -181,9 +204,11 @@ export class MigrationService {
   private async statusInternal() {
     const fileNames = await this.migrationsResolver.getFileNames();
     const client = await this.connect();
-    const collection = client.db().collection<ReturnType>(
-      this.configService.config.changelogCollectionName
-    );
+    const collection = client
+      .db()
+      .collection<ReturnType>(
+        this.configService.config.changelogCollectionName
+      );
     const changelog = await collection.find({}).toArray();
     return fileNames.map((fileName: string) => {
       const itemInLog = changelog.find(log => log.fileName === fileName);
@@ -204,7 +229,7 @@ export class MigrationService {
   }
 
   printStatus(status: ReturnType[], type?: 'table') {
-    if (type === 'table') {
+    if (type === 'table' && status.length) {
       return console.table(status, ['fileName', 'appliedAt']);
     }
     status.forEach((item, index) =>

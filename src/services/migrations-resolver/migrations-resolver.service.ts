@@ -1,13 +1,13 @@
 import { Injectable } from '@rxdi/core';
 import { MigrationSchema } from '../../injection.tokens';
-import { readdir } from 'fs';
+import { readdir, unlink } from 'fs';
 import { extname, join, isAbsolute } from 'path';
 import { promisify } from 'util';
 import { ConfigService } from '../config/config.service';
-import { exec } from 'child_process';
-
+import { TranspileTypescript } from '../../helpers/typescript-builder';
 @Injectable()
 export class MigrationsResolver {
+  defaultCompilationPath = `${process.cwd()}/dist/`;
   constructor(private configService: ConfigService) {}
 
   async getFileNames() {
@@ -21,10 +21,13 @@ export class MigrationsResolver {
   }
 
   async loadMigration(fileName: string): Promise<MigrationSchema> {
+    let migration: MigrationSchema;
     if (this.isTypescript(fileName)) {
-      return this.loadTsMigration(fileName);
+      migration = await this.loadTsMigration(fileName);
+    } else {
+      migration = require('esm')(module)(this.getFilePath(fileName));
     }
-    return require('esm')(module)(this.getFilePath(fileName));
+    return migration;
   }
 
   getFilePath(fileName: string) {
@@ -39,16 +42,47 @@ export class MigrationsResolver {
     return this.getFilePath(fileName).replace(process.cwd(), '');
   }
 
-  async loadTsMigration(fileName: string) {
-    const tsPath = this.getRelativePath(fileName);
-    await promisify(exec)(`npx gapi build --local --path=./${tsPath}`, {
-      cwd: process.cwd()
+  async clean(migrations: string[]) {
+    await Promise.all(
+      migrations.map(fileName => this.deleteArtefacts(fileName))
+    );
+    return true;
+  }
+
+  async deleteArtefacts(fileName: string) {
+    await this.delete(fileName);
+    await this.delete(`${fileName}.map`);
+  }
+
+  async delete(fileName: string) {
+    return new Promise((resolve, rejects) => {
+      unlink(this.getTsFilePath(fileName), err => {
+        if (err) {
+          rejects(err);
+        }
+        resolve(true);
+      });
     });
-    const compiledJsPath = `${process.cwd()}/dist/${fileName.replace(
-      'ts',
-      'js'
+  }
+
+  async loadTsMigration(fileName: string) {
+    return require(this.getTsFilePath(fileName));
+  }
+
+  async transpileMigrations(migrations: string[]) {
+    await TranspileTypescript(
+      migrations.map(fileName => this.getRelativePath(fileName))
+    );
+  }
+
+  getTsFilePath(fileName: string) {
+    return `${this.defaultCompilationPath}${this.replaceFilenameJsWithTs(
+      fileName
     )}`;
-    return require(compiledJsPath);
+  }
+
+  replaceFilenameJsWithTs(fileName: string) {
+    return fileName.replace('ts', 'js');
   }
   async resolve() {
     if (isAbsolute(this.configService.config.migrationsDir)) {
