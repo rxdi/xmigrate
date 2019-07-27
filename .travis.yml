@@ -1,7 +1,15 @@
+branches:
+  only:
+  - master
+cache:
+  directories:
+  - node_modules
 before_script:
   - npm install
   - npm install @gapi/cli
-script: npm test
+script:
+  - npm test
+  - npm run coveralls
 env:
   - DEPLOY_PLATFORM=heroku
 language: node_js

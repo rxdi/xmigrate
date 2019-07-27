@@ -196,10 +196,6 @@ describe('Global Xmigrate Tests', () => {
     expect(migrationResolver.getRelativePath(file)).toEqual(filePath);
   });
 
-  afterAll(async () => {
-    expect((await migrationResolver.getFileNames()).length).toEqual(0);
-  });
-
   it('Should create migration and run UP', async () =>
     await TestMigration('up', true));
   it('Should create migration and run DOWN', async () =>
@@ -210,4 +206,8 @@ describe('Global Xmigrate Tests', () => {
 
   it('Should create migration and test complete flow DOWN migration', async () =>
     StartMigration('down'));
+
+  afterAll(async () => {
+    expect((await migrationResolver.getFileNames()).length).toEqual(0);
+  });
 });
