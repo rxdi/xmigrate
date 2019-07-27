@@ -7,7 +7,7 @@ export class ConfigService {
   config: Config = DEFAULT_CONFIG;
 
   set(config: Config) {
-    this.config = Object.assign(config, this.config);
+    Object.assign(this.config, config);
   }
 
   get() {

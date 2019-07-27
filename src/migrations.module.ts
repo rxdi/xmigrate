@@ -74,7 +74,7 @@ export class MigrationsModule {
           ) => {
             try {
               configService.set(
-                await (require(join(process.cwd(), './xmigrate.js')) as (
+                await (require(join(process.cwd(), 'xmigrate.js')) as (
                   configService: ConfigService
                 ) => Promise<Config>)(configService)
               );

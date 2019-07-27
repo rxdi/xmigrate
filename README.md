@@ -43,9 +43,9 @@ module.exports = async () => {
     migrationsDir: 'migrations',
     defaultTemplate: 'es6',
     typescript: true,
-    outDir: './dist',
+    outDir: 'dist',
     logger: {
-      folder: './migrations-log',
+      folder: 'migrations-log',
       up: {
         success: 'up.success.log',
         error: 'up.error.log'

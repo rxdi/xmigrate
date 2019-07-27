@@ -8,8 +8,8 @@
     "build": "tsc && gapi build",
     "lint": "tslint -c tslint.json 'development/**/*.{ts,tsx}'",
     "pretest": "npm run lint",
-    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
-    "test": "jest"
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
