@@ -1,34 +1,20 @@
 {
-    "compilerOptions": {
-        "declaration": true,
-        "target": "es6",
-        "baseUrl": ".",
-        "module": "commonjs",
-        "stripInternal": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "moduleResolution": "node",
-        "noUnusedLocals": true,
-        "paths": { "*": ["types/*"] },
-        "outDir": "lib",
-        "lib": [
-            "es2017",
-            "es2016",
-            "es2015",
-            "es6",
-            "dom",
-            "esnext.asynciterable"
-        ],
-        "skipLibCheck": true,
-        "typeRoots": [
-            "node_modules/@types"
-        ],
-    },
-    "include": [
-        "./src/**/*",
-        "types"
-    ],
-    "files": [
-        "src/migrations.module.ts"
-    ]
+  "compilerOptions": {
+    "declaration": true,
+    "target": "es6",
+    "baseUrl": ".",
+    "module": "commonjs",
+    "stripInternal": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "noUnusedLocals": false,
+    "paths": { "*": ["types/*"] },
+    "outDir": "lib",
+    "lib": ["es2017", "es2016", "es2015", "es6", "dom", "esnext.asynciterable"],
+    "skipLibCheck": true,
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": ["./src/**/*", "types"],
+  "files": ["src/migrations.module.ts"]
 }

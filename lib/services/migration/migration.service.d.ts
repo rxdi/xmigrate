@@ -12,15 +12,18 @@ export declare class MigrationService {
     constructor(configService: ConfigService, database: DatabaseService, migrationsResolver: MigrationsResolver, logger: LogFactory);
     connect(): Promise<import("mongodb").MongoClient>;
     up(): Promise<ReturnType[]>;
-    down(): Promise<unknown>;
-    createWithTemplate(template: TemplateTypes, name: string): Promise<string>;
+    down(): Promise<ReturnType[]>;
+    createWithTemplate(template: TemplateTypes, name: string, config?: {
+        raw: boolean;
+        typescript?: boolean;
+    }): Promise<string>;
     private writeConfig;
     init(): Promise<void>;
     create({ name, template }: {
         name: any;
         template: any;
     }): Promise<void>;
-    private statusInternal;
+    statusInternal(): Promise<ReturnType[]>;
     status(): Promise<{
         status: boolean;
         result: ReturnType[];

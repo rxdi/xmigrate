@@ -21,6 +21,13 @@ export class Logger {
     this.errorLogger.write(this.getLogTemplate(res, '🔥'));
   }
 
+  close() {
+    this.successLogger.close();
+    this.errorLogger.close();
+    this.successLogger.end();
+    this.errorLogger.end();
+  }
+
   getLogTemplate(res: unknown, emoji: string) {
     return `
 ${emoji} ********* ${new Date()} *********
@@ -48,6 +55,10 @@ export class LogFactory {
       successPath: `${this.config.folder}/${this.config[type].success}`,
       errorPath: `${this.config.folder}/${this.config[type].error}`
     };
+  }
+
+  closeConnections() {
+    [...this.loggers.values()].forEach(logger => logger.close());
   }
 
   create(name: string, { successPath, errorPath }) {

@@ -7,6 +7,7 @@ export declare class Logger {
     constructor(successPath: string, errorPath: string);
     log(res: unknown): void;
     error(res: unknown): void;
+    close(): void;
     getLogTemplate(res: unknown, emoji: string): string;
 }
 export declare class LogFactory {
@@ -19,6 +20,7 @@ export declare class LogFactory {
         successPath: string;
         errorPath: string;
     };
+    closeConnections(): void;
     create(name: string, { successPath, errorPath }: {
         successPath: any;
         errorPath: any;

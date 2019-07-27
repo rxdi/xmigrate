@@ -5,9 +5,9 @@ import { extname, join, isAbsolute } from 'path';
 import { promisify } from 'util';
 import { ConfigService } from '../config/config.service';
 import { TranspileTypescript } from '../../helpers/typescript-builder';
+
 @Injectable()
 export class MigrationsResolver {
-  defaultCompilationPath = `${process.cwd()}/dist/`;
   constructor(private configService: ConfigService) {}
 
   async getFileNames() {
@@ -16,11 +16,22 @@ export class MigrationsResolver {
     )).filter(file => extname(file) === '.js' || this.isTypescript(file));
   }
 
+  async getDistFileNames() {
+    return (await promisify(readdir)(
+      this.configService.config.outDir || 'dist'
+    ))
+      .filter(file => extname(file) === '.js')
+      .map(f => this.getTsCompiledFilePath(f));
+  }
+
   isTypescript(file: string) {
     return extname(file) === '.ts' && this.configService.config.typescript;
   }
 
-  async loadMigration(fileName: string): Promise<MigrationSchema> {
+  async loadMigration(
+    fileName: string,
+    cwd?: string
+  ): Promise<MigrationSchema> {
     let migration: MigrationSchema;
     if (this.isTypescript(fileName)) {
       migration = await this.loadTsMigration(fileName);
@@ -42,7 +53,10 @@ export class MigrationsResolver {
     return this.getFilePath(fileName).replace(process.cwd(), '');
   }
 
-  async clean(migrations: string[]) {
+  async clean(migrations: string[] = []) {
+    if (!migrations.length) {
+      migrations = await this.getFileNames();
+    }
     await Promise.all(
       migrations.map(fileName => this.deleteArtefacts(fileName))
     );
@@ -50,40 +64,35 @@ export class MigrationsResolver {
   }
 
   async deleteArtefacts(fileName: string) {
-    await this.delete(fileName);
-    await this.delete(`${fileName}.map`);
+    await this.delete(this.getTsCompiledFilePath(fileName));
+    await this.delete(this.getTsCompiledFilePath(`${fileName}.map`));
   }
 
-  async delete(fileName: string) {
-    return new Promise((resolve, rejects) => {
-      unlink(this.getTsFilePath(fileName), err => {
-        if (err) {
-          rejects(err);
-        }
-        resolve(true);
-      });
-    });
+  async delete(path: string) {
+    return new Promise(resolve => unlink(path, () => resolve(true)));
   }
 
   async loadTsMigration(fileName: string) {
-    return require(this.getTsFilePath(fileName));
+    return require(this.getTsCompiledFilePath(fileName));
   }
 
   async transpileMigrations(migrations: string[]) {
     await TranspileTypescript(
-      migrations.map(fileName => this.getRelativePath(fileName))
+      migrations.map(fileName => this.getRelativePath(fileName)),
+      this.configService.config.outDir
     );
   }
 
-  getTsFilePath(fileName: string) {
-    return `${this.defaultCompilationPath}${this.replaceFilenameJsWithTs(
+  getTsCompiledFilePath(fileName: string) {
+    return join(process.cwd(), this.configService.config.outDir, this.replaceFilenameJsWithTs(
       fileName
-    )}`;
+    ));
   }
 
   replaceFilenameJsWithTs(fileName: string) {
     return fileName.replace('ts', 'js');
   }
+
   async resolve() {
     if (isAbsolute(this.configService.config.migrationsDir)) {
       return this.configService.config.migrationsDir;

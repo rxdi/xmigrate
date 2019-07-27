@@ -6,10 +6,8 @@ import { DEFAULT_CONFIG } from '../../default.config';
 export class ConfigService {
   config: Config = DEFAULT_CONFIG;
 
-  constructor(private initConfig: Config) {}
-
   set(config: Config) {
-    this.config = Object.assign(config, this.initConfig);
+    this.config = Object.assign(config, this.config);
   }
 
   get() {

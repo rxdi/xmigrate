@@ -95,8 +95,10 @@ export class MigrationService {
   }
 
   async down() {
+
     const downgraded: ReturnType[] = [];
     const statusItems = await this.statusInternal();
+
     const appliedItems = statusItems.filter(
       item => item.appliedAt !== 'PENDING'
     );
@@ -159,24 +161,36 @@ export class MigrationService {
       await this.migrationsResolver.clean([lastAppliedItem.fileName]);
     }
     this.printStatus(downgraded);
-    return result;
+    return downgraded;
   }
 
-  async createWithTemplate(template: TemplateTypes, name: string) {
-    if (!templates[template]) {
+  async createWithTemplate(
+    template: TemplateTypes,
+    name: string,
+    config: { raw: boolean; typescript?: boolean } = {
+      raw: false,
+      typescript: false
+    }
+  ) {
+    let rawTemplate = templates[template];
+
+    if (config.raw) {
+      rawTemplate = template;
+    } else if (!rawTemplate) {
       throw new Error(`🔥  *** Missing template ${template} ***`);
     }
-    const isTypescript = template === 'typescript';
 
-    const fileName = normalize(
+    const isTypescript = config.typescript || template === 'typescript';
+
+    const filePath = normalize(
       `./${this.configService.config.migrationsDir}/${nowAsString()}-${name}.${
         isTypescript ? 'ts' : 'js'
       }`
     );
-    await promisify(writeFile)(fileName, templates[template], {
+    await promisify(writeFile)(filePath, rawTemplate, {
       encoding: 'utf-8'
     });
-    return fileName;
+    return '/' + filePath;
   }
 
   private async writeConfig() {
@@ -214,7 +228,7 @@ export class MigrationService {
     process.exit(0);
   }
 
-  private async statusInternal() {
+  async statusInternal() {
     const fileNames = await this.migrationsResolver.getFileNames();
     const client = await this.connect();
     const collection = client

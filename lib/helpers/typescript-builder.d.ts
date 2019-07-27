@@ -1,1 +1,1 @@
-export declare const TranspileTypescript: (paths: string[]) => Promise<unknown>;
+export declare const TranspileTypescript: (paths: string[], outDir: string) => Promise<unknown>;

@@ -31,6 +31,7 @@ export interface Config {
             useNewUrlParser: true;
         };
     };
+    outDir: string;
     migrationsDir: string;
     changelogCollectionName: string;
     logger: LoggerConfig;

@@ -5,6 +5,7 @@ import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class DatabaseService {
+  connections: Map<string, MongoClient> = new Map();
   constructor(private configService: ConfigService) {}
   async connect() {
     const url = this.configService.config.mongodb.url;
@@ -25,7 +26,12 @@ export class DatabaseService {
     );
     const originalDb = client.db.bind(client);
     client.db = (dbName: string) => originalDb(dbName || databaseName);
+    this.connections.set(url, client);
     return client;
+  }
+
+  async close() {
+    await Promise.all([...this.connections.values()].map(c => c.close(true)));
   }
 
   mongooseConnect() {
