@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/xmigrate",
-  "version": "0.7.12",
+  "version": "0.7.13",
   "main": "index.js",
   "author": "Kristiyan Tachev",
   "license": "MIT",
