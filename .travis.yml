@@ -1,5 +1,6 @@
 before_script:
   - npm install
+  - npm install @gapi/cli
 script: npm test
 env:
   - DEPLOY_PLATFORM=heroku

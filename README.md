@@ -1,5 +1,6 @@
 
 # @rxdi/xmigrate 
+[![Build Status](https://travis-ci.org/rxdi/xmigrate.svg?branch=master)](https://travis-ci.org/rxdi/xmigrate)
 
 Migration library for `Mongodb` and `Mongoose` written in `typescript`
 

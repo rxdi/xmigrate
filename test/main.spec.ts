@@ -4,7 +4,7 @@ import { DEFAULT_CONFIG } from '../src/default.config';
 import { MigrationsResolver } from '../src/services/migrations-resolver/migrations-resolver.service';
 import { createTestBed, Container } from '@rxdi/core';
 import { GenericRunner } from '../src/services/generic-runner/generic-runner.service';
-import { LogFactory } from '../src/helpers';
+import { LogFactory, ensureDir } from '../src/helpers';
 import { ConfigService } from '../src/services/config/config.service';
 import { MigrationService } from '../src/services/migration/migration.service';
 import { DatabaseService } from '../src/services/database/database.service';
@@ -102,6 +102,11 @@ describe('Global Server Tests', () => {
       )
     );
   }
+
+  beforeAll(async () => {
+    await ensureDir('./migrations');
+    await ensureDir('./migrations-log');
+  });
 
   beforeAll(async () => {
     await createTestBed({
