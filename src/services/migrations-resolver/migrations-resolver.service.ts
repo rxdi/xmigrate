@@ -18,7 +18,7 @@ export class MigrationsResolver {
 
   async getDistFileNames() {
     return (await promisify(readdir)(
-      this.configService.config.outDir || 'dist'
+      this.configService.config.outDir
     ))
       .filter(file => extname(file) === '.js')
       .map(f => this.getTsCompiledFilePath(f));

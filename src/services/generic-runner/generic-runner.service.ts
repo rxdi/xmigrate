@@ -1,11 +1,13 @@
 import { ReturnType, Tasks, MigrationSchema } from '../../injection.tokens';
-import { normalize } from 'path';
+import { normalize, join } from 'path';
 import chalk from 'chalk';
 import { LogFactory } from '../../helpers/log-factory';
 import { Injectable } from '@rxdi/core';
 import { MigrationService } from '../migration/migration.service';
 import { ConfigService } from '../config/config.service';
 import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
+import { promisify } from 'util';
+import { rmdir } from 'fs';
 
 @Injectable()
 export class GenericRunner {
@@ -66,6 +68,11 @@ export class GenericRunner {
       }
       setTimeout(() => process.exit(1), 0);
     }
+    try {
+      await promisify(rmdir)(
+        join(process.cwd(), this.configService.config.outDir)
+      );
+    } catch (e) {}
   }
 
   private async rollback(fileName: string) {
@@ -92,7 +99,9 @@ export class GenericRunner {
     } else {
       migration = require(migrationPath);
     }
-    response.result = await migration.down(await this.migrationService.connect());
+    response.result = await migration.down(
+      await this.migrationService.connect()
+    );
     response.appliedAt = new Date();
     console.log(
       `\n🚀  ${chalk.green(

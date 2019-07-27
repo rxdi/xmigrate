@@ -43,7 +43,7 @@ export default async () => {
     migrationsDir: 'migrations',
     defaultTemplate: 'es6',
     typescript: true,
-    outDir: 'dist',
+    outDir: './.xmigrate',
     logger: {
       folder: 'migrations-log',
       up: {
@@ -248,8 +248,8 @@ Command that will be runned internally
 ```bash
 npx gapi build --glob ./1-migration.ts,./2-migration.ts
 ```
-After success transpiled migration will be started from `./dist/1-migration.js`
-Before exit script will remove `artifacts` left from transpilation located inside `./dist` folder
+After success transpiled migration will be started from `./.xmigrate/1-migration.js`
+Before exit script will remove `artifacts` left from transpilation located inside `./.xmigrate` folder
 
 ## Rallback
 
@@ -340,4 +340,138 @@ Up Migration Error log
   "errorMessage": "AAA",
   "fileName": "20190724235545-pesho.js"
 }
+```
+
+
+# Beta
+
+Typescript configuration
+
+When you change your configuration file to `xmigrate.ts` it will automatically `Transpile` to `ES5` and will be loaded
+This command requires `@gapi/cli` to be installed since we will `transpile` configuration with it!
+
+```typescript
+import { Config } from '@rxdi/xmigrate';
+
+export default async (): Promise<Config> => {
+  return {
+    changelogCollectionName: 'migrations',
+    migrationsDir: 'migrations',
+    defaultTemplate: 'es6',
+    typescript: true,
+    outDir: './.xmigrate',
+    logger: {
+      folder: 'migrations-log',
+      up: {
+        success: 'up.success.log',
+        error: 'up.error.log'
+      },
+      down: {
+        success: 'down.success.log',
+        error: 'down.error.log'
+      }
+    },
+    mongodb: {
+      url: `mongodb://localhost:27017`,
+      databaseName: 'test',
+      options: {
+        useNewUrlParser: true
+      }
+    },
+  };
+};
+
+```
+
+
+
+# API Usage
+
+```typescript
+import { Container, setup } from '@rxdi/core';
+
+import {
+  MigrationService,
+  GenericRunner,
+  LogFactory,
+  ConfigService,
+  LoggerConfig,
+  Config
+} from '@rxdi/xmigrate';
+
+const config = {
+  changelogCollectionName: 'migrations',
+  migrationsDir: 'migrations',
+  defaultTemplate: 'typescript',
+  typescript: true,
+  outDir: './.xmigrate',
+  logger: {
+    folder: './migrations-log',
+    up: {
+      success: 'up.success.log',
+      error: 'up.error.log'
+    },
+    down: {
+      success: 'down.success.log',
+      error: 'down.error.log'
+    }
+  },
+  mongodb: {
+    url: 'mongodb://localhost:27017',
+    databaseName: 'test',
+    options: {
+      useNewUrlParser: true
+    }
+  }
+};
+
+setup({
+  providers: [
+    GenericRunner,
+    LogFactory,
+    ConfigService,
+    {
+      provide: Config,
+      useValue: config
+    },
+    {
+      provide: LoggerConfig,
+      useValue: config.logger
+    }
+  ]
+}).subscribe(async () => {
+  const template = `
+import { MongoClient } from 'mongodb';
+
+export async function up(client: MongoClient) {
+  return true
+}
+export async function down(client: MongoClient) {
+  return true
+}
+`;
+
+  const migrationService = Container.get(MigrationService);
+
+  // Create migration with template
+  const filePath = await migrationService.createWithTemplate(
+    template as 'typescript',
+    'pesho1234',
+    { raw: true, typescript: true }
+  );
+  console.log(filePath);
+
+  // Up migration
+  await migrationService.up();
+  process.exit(0);
+
+  // Down migration
+  await migrationService.down();
+  process.exit(0);
+
+  // Status
+  await migrationService.status();
+
+  process.exit(0);
+}, console.error.bind(console));
 ```

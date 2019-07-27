@@ -5,7 +5,7 @@ export const DEFAULT_CONFIG: Config = {
   migrationsDir: 'migrations',
   defaultTemplate: 'es6',
   typescript: true,
-  outDir: './dist',
+  outDir: './.xmigrate',
   logger: {
     folder: './migrations-log',
     up: {

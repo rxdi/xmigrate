@@ -12,6 +12,11 @@ import { nextOrDefault, includes } from './helpers/args-extractors';
 import { DEFAULT_CONFIG } from './default.config';
 import { ConfigService } from './services/config/config.service';
 import { ensureDir } from './helpers';
+import { promisify } from 'util';
+import { exists, unlink } from 'fs';
+import { TranspileTypescript } from './helpers/typescript-builder';
+import { join } from 'path';
+import { MigrationsResolver } from './services/migrations-resolver/migrations-resolver.service';
 
 @Module()
 export class MigrationsModule {
@@ -22,13 +27,10 @@ export class MigrationsModule {
         GenericRunner,
         LogFactory,
         ConfigService,
+        MigrationsResolver,
         {
           provide: Config,
           useValue: config
-        },
-        {
-          provide: LoggerConfig,
-          useValue: config.logger
         },
         {
           provide: LoggerConfig,
@@ -72,9 +74,31 @@ export class MigrationsModule {
             configService: ConfigService
           ) => {
             try {
-              let settings = require('esm')(module)('./xmigrate');
+              let settings: any;
+              const configFilename = 'xmigrate';
+              if (await promisify(exists)(`./${configFilename}.ts`)) {
+                await TranspileTypescript(
+                  [`/${configFilename}.ts`],
+                  config.outDir
+                );
+                settings = require(join(
+                  process.cwd(),
+                  `./${config.outDir}`,
+                  `${configFilename}.js`
+                ));
+                await promisify(unlink)(
+                  join('./', config.outDir, 'xmigrate.js')
+                );
+                await promisify(unlink)(
+                  join('./', config.outDir, 'xmigrate.js.map')
+                );
+              } else {
+                settings = require('esm')(module)(`./${configFilename}.js`);
+              }
               if (settings.default) {
-                settings = await (settings as { default: () => Promise<Config> }).default();
+                settings = await (settings as {
+                  default: () => Promise<Config>;
+                }).default();
               } else {
                 settings = (await (settings as Function)()) as Config;
               }
@@ -93,7 +117,7 @@ export class MigrationsModule {
                 rollback: includes('--rollback')
               });
             }
-            return runner.run(command);
+            await runner.run(command);
           }
         }
       ]

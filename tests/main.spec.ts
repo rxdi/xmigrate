@@ -9,6 +9,8 @@ import { ConfigService } from '../src/services/config/config.service';
 import { MigrationService } from '../src/services/migration/migration.service';
 import { DatabaseService } from '../src/services/database/database.service';
 import { join } from 'path';
+import { promisify } from 'util';
+import { rmdir } from 'fs';
 
 export const xmigrate = (args: string[]) => {
   return new Promise(resolve => {
@@ -87,7 +89,7 @@ describe('Global Xmigrate Tests', () => {
       migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
     );
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
-    expect((await migrationResolver.getDistFileNames()).length).toEqual(1);
+    expect((await migrationResolver.getDistFileNames()).length).toEqual(0);
   }
 
   async function cleanStage() {
@@ -137,6 +139,7 @@ describe('Global Xmigrate Tests', () => {
   beforeAll(async () => {
     await ensureDir('./migrations');
     await ensureDir('./migrations-log');
+    await ensureDir('./.xmigrate');
   });
 
   beforeAll(async () => {
@@ -153,10 +156,6 @@ describe('Global Xmigrate Tests', () => {
           provide: LoggerConfig,
           useValue: config.logger
         },
-        {
-          provide: LoggerConfig,
-          useValue: config.logger
-        }
       ]
     });
     migrationResolver = Container.get(MigrationsResolver);
@@ -209,5 +208,10 @@ describe('Global Xmigrate Tests', () => {
 
   afterAll(async () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
+    try {
+      await promisify(rmdir)(
+        join(process.cwd(), this.configService.config.outDir)
+      );
+    } catch (e) {}
   });
 });

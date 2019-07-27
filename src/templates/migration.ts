@@ -3,7 +3,7 @@ export default `module.exports = async () => {
     changelogCollectionName: 'migrations',
     migrationsDir: 'migrations',
     defaultTemplate: 'es6',
-    outDir: './dist',
+    outDir: './.xmigrate',
     typescript: true,
     logger: {
       folder: './migrations-log',
