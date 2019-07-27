@@ -40,12 +40,12 @@ You can define `xmigrate.js` file where you execute command `xmigrate`
 export default async () => {
   return {
     changelogCollectionName: 'migrations',
-    migrationsDir: 'migrations',
+    migrationsDir: './migrations',
     defaultTemplate: 'es6',
     typescript: true,
     outDir: './.xmigrate',
     logger: {
-      folder: 'migrations-log',
+      folder: './migrations-log',
       up: {
         success: 'up.success.log',
         error: 'up.error.log'
@@ -348,7 +348,12 @@ Up Migration Error log
 Typescript configuration
 
 When you change your configuration file to `xmigrate.ts` it will automatically `Transpile` to `ES5` and will be loaded
-This command requires `@gapi/cli` to be installed since we will `transpile` configuration with it!
+
+This type of configuration requires `@gapi/cli` to be installed since we will `transpile` configuration with it!
+
+```bash
+npm i -g @gapi/cli
+```
 
 ```typescript
 import { Config } from '@rxdi/xmigrate';
@@ -356,12 +361,12 @@ import { Config } from '@rxdi/xmigrate';
 export default async (): Promise<Config> => {
   return {
     changelogCollectionName: 'migrations',
-    migrationsDir: 'migrations',
-    defaultTemplate: 'es6',
+    migrationsDir: './migrations',
+    defaultTemplate: 'typescript',
     typescript: true,
     outDir: './.xmigrate',
     logger: {
-      folder: 'migrations-log',
+      folder: './migrations-log',
       up: {
         success: 'up.success.log',
         error: 'up.error.log'
@@ -401,7 +406,7 @@ import {
 
 const config = {
   changelogCollectionName: 'migrations',
-  migrationsDir: 'migrations',
+  migrationsDir: './migrations',
   defaultTemplate: 'typescript',
   typescript: true,
   outDir: './.xmigrate',
@@ -474,4 +479,23 @@ export async function down(client: MongoClient) {
 
   process.exit(0);
 }, console.error.bind(console));
+```
+
+### Minimal configuration
+
+```typescript
+export default async () => {
+  return {
+    defaultTemplate: 'typescript',
+    outDir: './.xmigrate',
+    typescript: true,
+    mongodb: {
+      url: 'mongodb://localhost:27017',
+      databaseName: 'test',
+      options: {
+        useNewUrlParser: true
+      }
+    }
+  };
+};
 ```

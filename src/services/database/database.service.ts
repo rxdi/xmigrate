@@ -25,7 +25,7 @@ export class DatabaseService {
       this.configService.config.mongodb.options
     );
     const originalDb = client.db.bind(client);
-    client.db = (dbName: string) => originalDb(dbName || databaseName);
+    client.db = (dbName?: string) => originalDb(dbName || databaseName);
     this.connections.set(url, client);
     return client;
   }

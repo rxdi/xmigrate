@@ -1,7 +1,7 @@
 {
   "name": "@rxdi/xmigrate",
-  "version": "0.7.13",
-  "main": "index.js",
+  "version": "0.7.14",
+  "main": "./dist/main.js",
   "author": "Kristiyan Tachev",
   "license": "MIT",
   "scripts": {
@@ -66,7 +66,7 @@
     "verbose": true,
     "collectCoverage": true
   },
-  "types": "./dist/index.d.ts",
-  "module": "./dist/index.js",
-  "typings": "./dist/index.d.ts"
+  "types": "./lib/index.d.ts",
+  "module": "./lib/index.js",
+  "typings": "./lib/index.d.ts"
 }
