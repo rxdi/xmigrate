@@ -8,7 +8,7 @@ export const TranspileTypescript = (paths: string[]) => {
       '--glob',
       `${paths.toString()}`
     ]);
-    child.stdout.pipe(process.stdout);
+    // child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
     child.on('close', code => {
       if (code !== 0) {

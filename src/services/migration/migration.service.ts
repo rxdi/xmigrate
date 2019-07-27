@@ -2,7 +2,7 @@ import { DatabaseService } from '../database/database.service';
 import { Injectable } from '@rxdi/core';
 import { ReturnType } from '../../injection.tokens';
 import { promisify } from 'util';
-import { writeFile } from 'fs';
+import { writeFile, createWriteStream, readFile } from 'fs';
 import { nowAsString } from '../../helpers/date';
 import { TemplateTypes } from '../../templates/index';
 import * as templates from '../../templates/index';
@@ -95,8 +95,6 @@ export class MigrationService {
   }
 
   async down() {
-
-
     const downgraded: ReturnType[] = [];
     const statusItems = await this.statusInternal();
     const appliedItems = statusItems.filter(
@@ -181,10 +179,25 @@ export class MigrationService {
     return fileName;
   }
 
-  async init() {
+  private async writeConfig() {
     await promisify(writeFile)('./xmigrate.js', templates.migration, {
       encoding: 'utf-8'
     });
+  }
+
+  async init() {
+    const gitIgnore = await promisify(readFile)('./.gitignore', {
+      encoding: 'utf-8'
+    });
+    const stream = createWriteStream('./.gitignore', { flags: 'a' });
+    if (!gitIgnore.includes('.cache')) {
+      stream.write('\n.cache');
+    }
+    if (!gitIgnore.includes('dist')) {
+      stream.write('\ndist');
+    }
+    stream.end();
+    await this.writeConfig();
   }
 
   async create({ name, template }) {
