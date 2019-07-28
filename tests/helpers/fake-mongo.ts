@@ -49,7 +49,9 @@ export function TestCollectionMongoWrongCollection(response: unknown, data: Retu
       toArray: () => data
     }),
     updateOne: () => ({ response }),
-    deleteOne: () => ({ response })
+    deleteOne: () => {
+      throw new Error('Cannot delete inside this mongo collection')
+    }
   };
 }
 

@@ -101,7 +101,6 @@ export class MigrationService {
     const appliedItems = statusItems.filter(
       item => item.appliedAt !== 'PENDING'
     );
-
     const lastAppliedItem = appliedItems[appliedItems.length - 1];
     if (!lastAppliedItem) {
       return;

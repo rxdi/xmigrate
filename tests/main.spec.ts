@@ -412,7 +412,7 @@ describe('Global Xmigrate Tests', () => {
     );
   });
 
-  it('Should throw error UP when inserting to mongo collection "Could not update changelo"', async () => {
+  it('Should throw error UP when inserting to mongo collection "Could not update changelog"', async () => {
     await migrationService.createWithTemplate(
       template as 'typescript',
       'pesho1234',
@@ -465,24 +465,66 @@ describe('Global Xmigrate Tests', () => {
     );
   });
 
-  it('Should throw error DOWN when inserting to mongo collection "Could not update changelo"', async () => {
-    await migrationService.createWithTemplate(
-      template as 'typescript',
-      'pesho1234',
-      { raw: true, typescript: true }
-    );
+  it('Should throw error DOWN when inserting to mongo collection "Could not update changelog"', async () => {
     const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeMongoClientErrorWhenInsertingCollection(true)
+      FakeMongoClientErrorWhenInsertingCollection(true, [
+        {
+          fileName: '20190728192825-pesho1234.js',
+          appliedAt: new Date(),
+          result: {}
+        }
+      ])
     );
 
+    const spyResolver = spyOn(migrationResolver, 'getFileNames').and.callFake(
+      () => ['20190728192825-pesho1234.js']
+    );
+
+    const spyLoad = spyOn(migrationResolver, 'loadMigration').and.callFake(
+      () => ({ down: async () => ({}) })
+    );
     try {
       await migrationService.down();
     } catch (e) {
-      expect(spy).toHaveBeenCalled();
       expect(e.message).toBe(
-        'Could not update changelog: Cannot insert inside this mongo collection'
+        'Could not update changelog: Cannot delete inside this mongo collection'
       );
     }
+    expect(spy).toHaveBeenCalled();
+    expect(spyResolver).toHaveBeenCalled();
+    expect(spyLoad).toHaveBeenCalled();
+  });
+
+  it('Should throw custom error DOWN "', async () => {
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+      FakeMongoClientErrorWhenInsertingCollection(true, [
+        {
+          fileName: '20190728192825-pesho1234.js',
+          appliedAt: new Date(),
+          result: {}
+        }
+      ])
+    );
+
+    const spyResolver = spyOn(migrationResolver, 'getFileNames').and.callFake(
+      () => ['20190728192825-pesho1234.js']
+    );
+
+    const spyLoad = spyOn(migrationResolver, 'loadMigration').and.callFake(
+      () => ({
+        down: async () => {
+          throw new Error('test');
+        }
+      })
+    );
+    try {
+      await migrationService.down();
+    } catch (e) {
+      expect(e.message).toBe('test');
+    }
+    expect(spy).toHaveBeenCalled();
+    expect(spyResolver).toHaveBeenCalled();
+    expect(spyLoad).toHaveBeenCalled();
     const fileNames = await migrationResolver.getFileNames();
     await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
     await migrationResolver.delete(
