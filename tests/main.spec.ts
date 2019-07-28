@@ -215,7 +215,11 @@ describe('Global Xmigrate Tests', () => {
       'typescript',
       'pesho1234'
     );
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+    FakeMongoClient({ up: true }, 'gosho')
+  );
     const res = await migrationService.status();
+    expect(spy).toHaveBeenCalled();
     expect(filePath).toBeTruthy();
     expect(res.status).toBeTruthy();
     expect(res.result.length).toBe(1);
