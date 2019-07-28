@@ -205,8 +205,8 @@ export class MigrationService {
     if (!gitIgnore.includes('.cache')) {
       stream.write('\n.cache');
     }
-    if (!gitIgnore.includes('dist')) {
-      stream.write('\ndist');
+    if (!gitIgnore.includes('.xmigrate')) {
+      stream.write('\n.xmigrate');
     }
     stream.end();
     await this.writeConfig();

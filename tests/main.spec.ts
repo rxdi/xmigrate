@@ -10,7 +10,7 @@ import { MigrationService } from '../src/services/migration/migration.service';
 import { DatabaseService } from '../src/services/database/database.service';
 import { join } from 'path';
 import { promisify } from 'util';
-import { rmdir, exists } from 'fs';
+import { rmdir, exists, writeFile, readFile, unlink } from 'fs';
 import {
   FakeMongoClient,
   FakeMongoClientErrorWhenInsertingCollection
@@ -201,6 +201,21 @@ describe('Global Xmigrate Tests', () => {
     expect(Container.get(Config)).toEqual(file);
     expect(file).toEqual(DEFAULT_CONFIG);
     migrationResolver.delete(join(cwd, './xmigrate.js'));
+  });
+
+  it('Should create init file with .gitignore', async () => {
+    const gitIgnore = await promisify(readFile)('./.gitignore', {encoding: 'utf-8'});
+    await promisify(writeFile)('./.gitignore-temp', gitIgnore, {encoding: 'utf-8'});
+    await promisify(unlink)('./.gitignore');
+    await promisify(writeFile)('./.gitignore', {encoding: 'utf-8'}, '');
+    await migrationService.init();
+    const file = await require(join(cwd, './xmigrate.js'))();
+    expect(Container.get(Config)).toEqual(file);
+    expect(file).toEqual(DEFAULT_CONFIG);
+    migrationResolver.delete(join(cwd, './xmigrate.js'));
+    await promisify(unlink)('./.gitignore');
+    await promisify(unlink)('./.gitignore-temp');
+    await promisify(writeFile)('./.gitignore', gitIgnore, {encoding: 'utf-8'});
   });
 
   it('Should have no files inside migrations folder', async () => {

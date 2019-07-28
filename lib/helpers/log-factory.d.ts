@@ -4,9 +4,11 @@ import { WriteStream } from 'fs';
 export declare class Logger {
     successLogger: WriteStream;
     errorLogger: WriteStream;
+    errorFinished: boolean;
+    successFinished: boolean;
     constructor(successPath: string, errorPath: string);
-    log(res: unknown): void;
-    error(res: unknown): void;
+    log(res: unknown): Promise<unknown>;
+    error(res: unknown): Promise<unknown>;
     close(): void;
     getLogTemplate(res: unknown, emoji: string): string;
 }

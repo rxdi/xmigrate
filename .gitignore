@@ -4,4 +4,3 @@ migrations-log
 coverage
 .cache
 .xmigrate
-dist
