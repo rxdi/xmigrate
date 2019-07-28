@@ -214,7 +214,7 @@ export class MigrationService {
     await this.writeConfig();
   }
 
-  async create({ name, template }) {
+  async create({ name, template }: { name: string; template: TemplateTypes }) {
     const customTemplate =
       template || this.configService.config.defaultTemplate;
     const fileName = await this.createWithTemplate(customTemplate, name);

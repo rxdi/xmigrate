@@ -20,8 +20,8 @@ export declare class MigrationService {
     private writeConfig;
     init(): Promise<void>;
     create({ name, template }: {
-        name: any;
-        template: any;
+        name: string;
+        template: TemplateTypes;
     }): Promise<void>;
     statusInternal(): Promise<ReturnType[]>;
     status(): Promise<{

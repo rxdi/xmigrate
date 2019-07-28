@@ -61,7 +61,10 @@ export class LogFactory {
     [...this.loggers.values()].forEach(logger => logger.close());
   }
 
-  create(name: string, { successPath, errorPath }) {
+  create(
+    name: string,
+    { successPath, errorPath }: { successPath: string; errorPath: string }
+  ) {
     if (this.has(name)) {
       return this.get(name);
     }

@@ -22,8 +22,8 @@ export declare class LogFactory {
     };
     closeConnections(): void;
     create(name: string, { successPath, errorPath }: {
-        successPath: any;
-        errorPath: any;
+        successPath: string;
+        errorPath: string;
     }): Logger;
     has(name: string): boolean;
     get(name: string): Logger;

@@ -6,6 +6,7 @@
     "module": "commonjs",
     "stripInternal": true,
     "emitDecoratorMetadata": true,
+    "noImplicitAny": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "noUnusedLocals": true,
