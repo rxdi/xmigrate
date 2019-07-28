@@ -1,8 +1,18 @@
+import { ReturnType } from '../../src/injection.tokens';
+
 function FakeDatabase(response: unknown, databaseName: string) {
   return {
     collection: () => ({
       insertOne: () => [''],
-      find: () => ({ toArray: () => [''] }),
+      find: () => ({
+        toArray: () => [
+          {
+            fileName: '20190728192825-pesho1234.js',
+            appliedAt: new Date(),
+            result: {}
+          }
+        ]
+      }),
       updateOne: () => ({ response }),
       deleteOne: () => ({ response })
     })
@@ -20,16 +30,22 @@ export class MongoClientMockUp {
   }
 }
 
-export function FakeMongoClient(response: unknown,  databaseName: string) {
+export function TestCollectionMongo(response: unknown, data: ReturnType[] = []) {
+  return {
+    insertOne: () => data,
+    find: () => ({
+      toArray: () => data
+    }),
+    updateOne: () => ({ response }),
+    deleteOne: () => ({ response })
+  };
+}
+
+export function FakeMongoClient(response: unknown, data: ReturnType[] = []) {
   return {
     connect: () => {},
     db: () => ({
-      collection: () => ({
-        insertOne: () => [''],
-        find: () => ({ toArray: () => [''] }),
-        updateOne: () => ({ response }),
-        deleteOne: () => ({ response })
-      })
+      collection: () => TestCollectionMongo(response, [...data])
     })
   };
 }

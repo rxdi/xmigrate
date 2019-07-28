@@ -83,7 +83,7 @@ describe('Global Xmigrate Tests', () => {
     await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(response, 'gosho')
+      FakeMongoClient(response)
     );
     const res: any = await migration[type](await databaseService.connect());
     expect(res['response']).toEqual(response);
@@ -121,7 +121,7 @@ describe('Global Xmigrate Tests', () => {
       { raw: true, typescript: true }
     );
     const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeMongoClient({ up: true }, 'gosho')
+      FakeMongoClient({ up: true })
     );
 
     const [file] = await migrationResolver.getFileNames();
@@ -145,7 +145,7 @@ describe('Global Xmigrate Tests', () => {
 
   async function StartMigrationWithCrash(type: 'up' | 'down') {
     const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeMongoClient({ up: true }, 'gosho')
+      FakeMongoClient({ up: true })
     );
     try {
       await migrationService[type]();
@@ -228,7 +228,6 @@ describe('Global Xmigrate Tests', () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
   });
 
-
   it('Should create migration and run UP', async () =>
     await TestMigration('up', true));
   it('Should create migration and run DOWN', async () =>
@@ -250,7 +249,7 @@ describe('Global Xmigrate Tests', () => {
       'pesho1234'
     );
     const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeMongoClient({ up: true }, 'gosho')
+      FakeMongoClient({ up: true })
     );
     const res = await migrationService.status();
     expect(spy).toHaveBeenCalled();
@@ -263,6 +262,28 @@ describe('Global Xmigrate Tests', () => {
       migrationResolver.getFilePath(res.result[0].fileName)
     );
     expect(isFileExists).toBeTruthy();
+  });
+
+  it('Should create migration and try to get status to "Migrated"', async () => {
+    const appliedAt = new Date('2017-06-13T04:41:20');
+    const mongoFake = FakeMongoClient({ up: true }, [
+      {
+        fileName: '20190728192825-pesho1234.js',
+        appliedAt,
+        result: {}
+      }
+    ]);
+    const spy = spyOn(migrationService, 'connect').and.callFake(
+      () => mongoFake
+    );
+
+    const spyResolver = spyOn(migrationResolver, 'getFileNames').and.callFake(
+      () => ['20190728192825-pesho1234.js']
+    );
+    const res = await migrationService.statusInternal();
+    expect(`${new Date(res[0].appliedAt)}`).toBe(`${appliedAt}`);
+    expect(spy).toHaveBeenCalled();
+    expect(spyResolver).toHaveBeenCalled();
   });
 
   it('Should test printStatus method', async () => {
@@ -293,7 +314,7 @@ describe('Global Xmigrate Tests', () => {
     expect(spyCreateWithTemplate).toHaveBeenCalled();
   });
 
-   // Refactor to single method
+  // Refactor to single method
   it('Should check if UP will throw error when executed', async () => {
     await migrationService.createWithTemplate(
       ErrorTemplate as 'typescript',
@@ -305,7 +326,7 @@ describe('Global Xmigrate Tests', () => {
     await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(true, 'gosho')
+      FakeMongoClient(true)
     );
     try {
       await migration.up(await databaseService.connect());
@@ -322,7 +343,7 @@ describe('Global Xmigrate Tests', () => {
     );
   });
 
- // Refactor to single method
+  // Refactor to single method
   it('Should check if DOWN will throw error when executed', async () => {
     await migrationService.createWithTemplate(
       ErrorTemplate as 'typescript',
@@ -334,7 +355,7 @@ describe('Global Xmigrate Tests', () => {
     await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(true, 'gosho')
+      FakeMongoClient(true)
     );
     try {
       await migration.down(await databaseService.connect());
