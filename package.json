@@ -62,6 +62,20 @@
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
     },
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/.xmigrate/**",
+      "!**/lib/**",
+      "!**/examples/**",
+      "!./xmigrate.ts",
+      "!./src/app.module.ts",
+      "!./src/index.ts",
+      "!./src/main.ts",
+      "!./src/services/index.ts",
+      "!./src/services/generic-runner/generic-runner.service.ts",
+      "!./src/migrations.module.ts",
+      "!./tests/helpers/**"
+    ],
     "testRegex": "/*/.*\\.spec.(ts|tsx|js)$",
     "verbose": true,
     "collectCoverage": true
