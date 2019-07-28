@@ -1,6 +1,49 @@
 import { nextOrDefault, includes } from './args-extractors';
+import { LogFactory } from './log-factory';
+import { Container, createTestBed } from '@rxdi/core';
+import { Config, LoggerConfig } from '../injection.tokens';
+
+const config = {
+  changelogCollectionName: 'migrations',
+  migrationsDir: './migrations',
+  defaultTemplate: 'es6',
+  typescript: true,
+  outDir: './.xmigrate',
+  logger: {
+    folder: './migrations-log',
+    up: {
+      success: 'up.success.log',
+      error: 'up.error.log'
+    },
+    down: {
+      success: 'down.success.log',
+      error: 'down.error.log'
+    }
+  },
+  mongodb: {
+    url: `mongodb://localhost:27017`,
+    databaseName: 'test',
+    options: {
+      useNewUrlParser: true
+    }
+  }
+};
 
 describe('Helpers', () => {
+  beforeEach(async () => {
+    await createTestBed({
+      providers: [
+        {
+          provide: Config,
+          useValue: config
+        },
+        {
+          provide: LoggerConfig,
+          useValue: config.logger
+        }
+      ]
+    });
+  });
   it('Should set "es6" template when argument --template es6 present', async () => {
     expect(nextOrDefault('--template', 'typescript')).toBe('typescript');
     process.argv.push('--template');
@@ -14,7 +57,7 @@ describe('Helpers', () => {
     expect(nextOrDefault('--template', 'typescript')).toBe('typescript');
   });
 
-  it('Should set default property to be trutty with fallback', async () => {
+  it('Should set default property to be Oh yeah', async () => {
     process.argv.push('--template');
     process.argv.push('yes');
     expect(
@@ -26,7 +69,7 @@ describe('Helpers', () => {
     process.argv.pop();
   });
 
-  it('Should set default property to be trutty with fallback', async () => {
+  it('Should set default property to be Noo', async () => {
     process.argv.push('--template');
     process.argv.push('no');
     expect(
@@ -54,5 +97,37 @@ describe('Helpers', () => {
     process.argv.push('up');
     expect(includes('up')).toBeTruthy();
     process.argv.pop();
+  });
+
+  it('Next or default will get default value provided when argument starts with "--"', () => {
+    process.argv.push('up');
+    process.argv.push('--');
+    expect(nextOrDefault('up', 'gosho')).toBe('gosho');
+    process.argv.pop();
+    process.argv.pop();
+  });
+
+  it('Next or default will get default value when no argument provided', () => {
+    process.argv.push('up');
+    expect(nextOrDefault('up', 'gosho')).toBe('gosho');
+    process.argv.pop();
+  });
+
+  it('Should log error and execute error with logFactory', () => {
+    const logFactory = Container.get(LogFactory);
+    class FakeLogger {
+      error() {}
+    }
+    const spyCreate = spyOn(logFactory, 'create').and.callFake(() => new FakeLogger());
+    logFactory.create('pesho', {
+      errorPath: './test.error.log',
+      successPath: './test.succes.log'
+    });
+    const log = logFactory.create('pesho', {
+      errorPath: './test.error.log',
+      successPath: './test.succes.log'
+    });
+    log.error('omg');
+    expect(spyCreate).toHaveBeenCalled();
   });
 });

@@ -44,6 +44,25 @@ export async function down(client: MongoClient) {
 }
 `;
 
+const ErrorTemplate = `
+import { MongoClient } from 'mongodb';
+
+export async function up(client: MongoClient) {
+  throw new Error('This is error from UP migration')
+  return await client
+    .db()
+    .collection('albums')
+    .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: true } });
+}
+export async function down(client: MongoClient) {
+  throw new Error('This is error from DOWN migration')
+  return await client
+    .db()
+    .collection('albums')
+    .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: false } });
+}
+`;
+
 describe('Global Xmigrate Tests', () => {
   const config: Config = DEFAULT_CONFIG;
   let migrationResolver: MigrationsResolver;
@@ -216,8 +235,8 @@ describe('Global Xmigrate Tests', () => {
       'pesho1234'
     );
     const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-    FakeMongoClient({ up: true }, 'gosho')
-  );
+      FakeMongoClient({ up: true }, 'gosho')
+    );
     const res = await migrationService.status();
     expect(spy).toHaveBeenCalled();
     expect(filePath).toBeTruthy();
@@ -233,23 +252,88 @@ describe('Global Xmigrate Tests', () => {
 
   it('Should test printStatus method', async () => {
     const spy = spyOn(console, 'log');
-    await migrationService.printStatus([{appliedAt: new Date(), fileName: 'dada', result: []}]);
+    await migrationService.printStatus([
+      { appliedAt: new Date(), fileName: 'dada', result: [] }
+    ]);
     expect(spy).toHaveBeenCalled();
   });
 
   it('Should test printStatus table method', async () => {
     const spy = spyOn(console, 'log');
-    await migrationService.printStatus([{appliedAt: new Date(), fileName: 'dada', result: []}], 'table');
+    await migrationService.printStatus(
+      [{ appliedAt: new Date(), fileName: 'dada', result: [] }],
+      'table'
+    );
     expect(spy).toHaveBeenCalled();
   });
 
-
   it('Should create template and createWithTemplate method should be called', async () => {
     const spy = spyOn(console, 'log');
-    const spyCreateWithTemplate = spyOn(migrationService, 'createWithTemplate').and.callFake(() => 'pesho');
-    await migrationService.create({ name: 'pesho' , template: 'typescript'});
+    const spyCreateWithTemplate = spyOn(
+      migrationService,
+      'createWithTemplate'
+    ).and.callFake(() => 'pesho');
+    await migrationService.create({ name: 'pesho', template: 'typescript' });
     expect(spy).toHaveBeenCalled();
     expect(spyCreateWithTemplate).toHaveBeenCalled();
+  });
+
+   // Refactor to single method
+  it('Should check if UP will throw error when executed', async () => {
+    await migrationService.createWithTemplate(
+      ErrorTemplate as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    const fileNames = await migrationResolver.getFileNames();
+    expect(fileNames.length).toBe(1);
+    await migrationResolver.transpileMigrations(fileNames);
+    const migration = await migrationResolver.loadMigration(fileNames[0]);
+    const spy = spyOn(databaseService, 'connect').and.callFake(() =>
+      FakeMongoClient(true, 'gosho')
+    );
+    try {
+      await migration.up(await databaseService.connect());
+    } catch (e) {
+      expect(spy).toHaveBeenCalled();
+      expect(e.message).toBe('This is error from UP migration');
+    }
+    await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(fileNames[0])
+    );
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
+    );
+  });
+
+ // Refactor to single method
+  it('Should check if DOWN will throw error when executed', async () => {
+    await migrationService.createWithTemplate(
+      ErrorTemplate as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    const fileNames = await migrationResolver.getFileNames();
+    expect(fileNames.length).toBe(1);
+    await migrationResolver.transpileMigrations(fileNames);
+    const migration = await migrationResolver.loadMigration(fileNames[0]);
+    const spy = spyOn(databaseService, 'connect').and.callFake(() =>
+      FakeMongoClient(true, 'gosho')
+    );
+    try {
+      await migration.down(await databaseService.connect());
+    } catch (e) {
+      expect(spy).toHaveBeenCalled();
+      expect(e.message).toBe('This is error from DOWN migration');
+    }
+    await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(fileNames[0])
+    );
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
+    );
   });
 
   afterAll(async () => {

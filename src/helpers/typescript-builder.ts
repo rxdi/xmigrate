@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 
 export const TranspileTypescript = (paths: string[], outDir: string) => {
-  return new Promise((resolve: () => any) => {
+  return new Promise((resolve, reject) => {
     const child = spawn('npx', [
       'gapi',
       'build',
@@ -12,11 +12,6 @@ export const TranspileTypescript = (paths: string[], outDir: string) => {
     ]);
     // child.stdout.pipe(process.stdout);
     child.stderr.pipe(process.stderr);
-    child.on('close', (code: number) => {
-      if (code !== 0) {
-        throw new Error();
-      }
-      resolve();
-    });
+    child.on('close', (code: number) => resolve(code));
   });
 };
