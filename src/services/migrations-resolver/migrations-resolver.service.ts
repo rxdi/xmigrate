@@ -1,7 +1,7 @@
 import { Injectable } from '@rxdi/core';
 import { MigrationSchema } from '../../injection.tokens';
 import { readdir, unlink } from 'fs';
-import { extname, join, isAbsolute } from 'path';
+import { extname, join } from 'path';
 import { promisify } from 'util';
 import { ConfigService } from '../config/config.service';
 import { TranspileTypescript } from '../../helpers/typescript-builder';
@@ -56,7 +56,7 @@ export class MigrationsResolver {
   }
 
   async clean(migrations: string[]) {
-    migrations = migrations || await this.getFileNames();
+    migrations = migrations || (await this.getFileNames());
     await Promise.all(
       migrations.map(fileName => this.deleteArtefacts(fileName))
     );
@@ -93,12 +93,5 @@ export class MigrationsResolver {
 
   replaceFilenameJsWithTs(fileName: string) {
     return fileName.replace('ts', 'js');
-  }
-
-  async resolve() {
-    if (isAbsolute(this.configService.config.migrationsDir)) {
-      return this.configService.config.migrationsDir;
-    }
-    return join(process.cwd(), this.configService.config.migrationsDir);
   }
 }

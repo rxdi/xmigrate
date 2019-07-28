@@ -11,6 +11,7 @@ import { DatabaseService } from '../src/services/database/database.service';
 import { join } from 'path';
 import { promisify } from 'util';
 import { rmdir } from 'fs';
+import { FakeMongoClient } from './helpers/fake-mongo';
 
 export const xmigrate = (args: string[]) => {
   return new Promise(resolve => {
@@ -43,19 +44,6 @@ export async function down(client: MongoClient) {
 }
 `;
 
-function FakeMongoClient(response: unknown) {
-  return {
-    db: () => ({
-      collection: () => ({
-        insertOne: () => [''],
-        find: () => ({ toArray: () => [''] }),
-        updateOne: () => ({ response }),
-        deleteOne: () => ({ response })
-      })
-    })
-  };
-}
-
 describe('Global Xmigrate Tests', () => {
   const config: Config = DEFAULT_CONFIG;
   let migrationResolver: MigrationsResolver;
@@ -76,7 +64,7 @@ describe('Global Xmigrate Tests', () => {
     await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(response)
+      FakeMongoClient(response, 'gosho')
     );
     const res: any = await migration[type](await databaseService.connect());
     expect(res['response']).toEqual(response);
@@ -114,7 +102,7 @@ describe('Global Xmigrate Tests', () => {
       { raw: true, typescript: true }
     );
     const spy = spyOn(migrationService, 'connect').and.callFake(() =>
-      FakeMongoClient({ up: true })
+      FakeMongoClient({ up: true }, 'gosho')
     );
 
     const [file] = await migrationResolver.getFileNames();
@@ -136,6 +124,16 @@ describe('Global Xmigrate Tests', () => {
     expect(item.result.response).toEqual(fakeMigration[0].result);
   }
 
+  async function StartMigrationWithCrash(type: 'up' | 'down') {
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+      FakeMongoClient({ up: true }, 'gosho')
+    );
+    try {
+      await migrationService[type]();
+    } catch (e) {}
+    expect(spy).toHaveBeenCalled();
+  }
+
   beforeAll(async () => {
     await ensureDir('./migrations');
     await ensureDir('./migrations-log');
@@ -155,7 +153,7 @@ describe('Global Xmigrate Tests', () => {
         {
           provide: LoggerConfig,
           useValue: config.logger
-        },
+        }
       ]
     });
     migrationResolver = Container.get(MigrationsResolver);
@@ -206,12 +204,13 @@ describe('Global Xmigrate Tests', () => {
   it('Should create migration and test complete flow DOWN migration', async () =>
     StartMigration('down'));
 
+  it('Should crash UP migration', async () => {
+    StartMigrationWithCrash('down');
+  });
   afterAll(async () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
     try {
-      await promisify(rmdir)(
-        join(process.cwd(), config.outDir)
-      );
+      await promisify(rmdir)(join(process.cwd(), config.outDir));
     } catch (e) {}
   });
 });

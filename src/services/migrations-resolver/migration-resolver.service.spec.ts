@@ -2,7 +2,7 @@ import { createTestBed, Container } from '@rxdi/core';
 import { MigrationsResolver } from './migrations-resolver.service';
 import { join } from 'path';
 
-describe('Global Xmigrate Tests', () => {
+describe('Migration resolver service', () => {
   let resolver: MigrationsResolver;
   beforeAll(async () => {
     await createTestBed({

@@ -20,7 +20,7 @@ export class DatabaseService {
           'See https://github.com/seppevs/migrate-mongo#initialize-a-new-project'
       );
     }
-    const client = await MongoClient.connect(
+    const client = await this.getMongoClient().connect(
       url,
       this.configService.config.mongodb.options
     );
@@ -28,6 +28,10 @@ export class DatabaseService {
     client.db = (dbName?: string) => originalDb(dbName || databaseName);
     this.connections.set(url, client);
     return client;
+  }
+
+  getMongoClient() {
+    return MongoClient;
   }
 
   async close() {
