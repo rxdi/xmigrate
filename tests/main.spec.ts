@@ -314,6 +314,14 @@ describe('Global Xmigrate Tests', () => {
     expect(spyCreateWithTemplate).toHaveBeenCalled();
   });
 
+  it('Should throw error if provided template is missing', async () => {
+    try {
+      await migrationService.create({ name: 'pesho', template: 'typescript2' as any });
+    } catch (e) {
+      expect(e.message).toBe(`🔥  *** Missing template typescript2 ***`);
+    }
+  });
+
   // Refactor to single method
   it('Should check if UP will throw error when executed', async () => {
     await migrationService.createWithTemplate(
