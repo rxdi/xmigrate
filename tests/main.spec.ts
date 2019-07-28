@@ -11,7 +11,10 @@ import { DatabaseService } from '../src/services/database/database.service';
 import { join } from 'path';
 import { promisify } from 'util';
 import { rmdir, exists } from 'fs';
-import { FakeMongoClient } from './helpers/fake-mongo';
+import {
+  FakeMongoClient,
+  FakeMongoClientErrorWhenInsertingCollection
+} from './helpers/fake-mongo';
 
 export const xmigrate = (args: string[]) => {
   return new Promise(resolve => {
@@ -234,7 +237,7 @@ describe('Global Xmigrate Tests', () => {
   it('Should create migration and run DOWN', async () =>
     await TestMigration('down', false));
 
-    it('Should create migration and test complete flow UP migration', async () =>
+  it('Should create migration and test complete flow UP migration', async () =>
     StartMigration('up'));
 
   it('Should create migration and test complete flow DOWN migration', async () =>
@@ -317,7 +320,10 @@ describe('Global Xmigrate Tests', () => {
 
   it('Should throw error if provided template is missing', async () => {
     try {
-      await migrationService.create({ name: 'pesho', template: 'typescript2' as any });
+      await migrationService.create({
+        name: 'pesho',
+        template: 'typescript2' as any
+      });
     } catch (e) {
       expect(e.message).toBe(`🔥  *** Missing template typescript2 ***`);
     }
@@ -406,6 +412,86 @@ describe('Global Xmigrate Tests', () => {
     );
   });
 
+  it('Should throw error UP when inserting to mongo collection "Could not update changelo"', async () => {
+    await migrationService.createWithTemplate(
+      template as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+      FakeMongoClientErrorWhenInsertingCollection(true)
+    );
+
+    try {
+      await migrationService.up();
+    } catch (e) {
+      expect(spy).toHaveBeenCalled();
+      expect(e.message).toBe(
+        'Could not update changelog: Cannot insert inside this mongo collection'
+      );
+    }
+    const fileNames = await migrationResolver.getFileNames();
+    await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(fileNames[0])
+    );
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
+    );
+  });
+
+  it('Should check if DOWN will throw with specific context', async () => {
+    await migrationService.createWithTemplate(
+      ErrorTemplate as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+      FakeMongoClient(true)
+    );
+    try {
+      await migrationService.down();
+    } catch (e) {
+      expect(spy).toHaveBeenCalled();
+      expect(e.message).toBe('This is error from DOWN migration');
+    }
+    const fileNames = await migrationResolver.getFileNames();
+    await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(fileNames[0])
+    );
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
+    );
+  });
+
+  it('Should throw error DOWN when inserting to mongo collection "Could not update changelo"', async () => {
+    await migrationService.createWithTemplate(
+      template as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
+      FakeMongoClientErrorWhenInsertingCollection(true)
+    );
+
+    try {
+      await migrationService.down();
+    } catch (e) {
+      expect(spy).toHaveBeenCalled();
+      expect(e.message).toBe(
+        'Could not update changelog: Cannot insert inside this mongo collection'
+      );
+    }
+    const fileNames = await migrationResolver.getFileNames();
+    await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(fileNames[0])
+    );
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
+    );
+  });
 
   afterAll(async () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);

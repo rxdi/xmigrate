@@ -40,12 +40,34 @@ export function TestCollectionMongo(response: unknown, data: ReturnType[] = []) 
     deleteOne: () => ({ response })
   };
 }
+export function TestCollectionMongoWrongCollection(response: unknown, data: ReturnType[] = []) {
+  return {
+    insertOne: () => {
+      throw new Error('Cannot insert inside this mongo collection');
+    },
+    find: () => ({
+      toArray: () => data
+    }),
+    updateOne: () => ({ response }),
+    deleteOne: () => ({ response })
+  };
+}
 
 export function FakeMongoClient(response: unknown, data: ReturnType[] = []) {
   return {
     connect: () => {},
     db: () => ({
       collection: () => TestCollectionMongo(response, [...data])
+    })
+  };
+}
+
+
+export function FakeMongoClientErrorWhenInsertingCollection(response: unknown, data: ReturnType[] = []) {
+  return {
+    connect: () => {},
+    db: () => ({
+      collection: () => TestCollectionMongoWrongCollection(response, [...data])
     })
   };
 }
