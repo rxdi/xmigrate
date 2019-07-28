@@ -6,6 +6,7 @@ export declare class DatabaseService {
     connections: Map<string, MongoClient>;
     constructor(configService: ConfigService);
     connect(): Promise<MongoClient>;
+    getMongoClient(): typeof MongoClient;
     close(): Promise<void>;
     mongooseConnect(): Promise<typeof import("mongoose")>;
 }

@@ -225,7 +225,6 @@ export class MigrationService {
     )}
 \n🚀  ${chalk.green.bold('Migration template created!')}
 `);
-    process.exit(0);
   }
 
   async statusInternal() {

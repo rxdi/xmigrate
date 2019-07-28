@@ -11,7 +11,7 @@ export declare class GenericRunner {
     private tasks;
     constructor(logger: LogFactory, configService: ConfigService, resolver: MigrationsResolver, migrationService: MigrationService);
     setTasks(tasks: any[]): void;
-    run(name: Tasks, args?: any): Promise<void>;
+    run(name: Tasks, args?: any): Promise<boolean>;
     private rollback;
     bind(self: MigrationService): this;
     private logEnvironment;

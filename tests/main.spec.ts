@@ -10,7 +10,7 @@ import { MigrationService } from '../src/services/migration/migration.service';
 import { DatabaseService } from '../src/services/database/database.service';
 import { join } from 'path';
 import { promisify } from 'util';
-import { rmdir } from 'fs';
+import { rmdir, exists } from 'fs';
 import { FakeMongoClient } from './helpers/fake-mongo';
 
 export const xmigrate = (args: string[]) => {
@@ -191,6 +191,8 @@ describe('Global Xmigrate Tests', () => {
     );
     const [file] = await migrationResolver.getFileNames();
     expect(migrationResolver.getRelativePath(file)).toEqual(filePath);
+    await migrationResolver.delete(migrationResolver.getFilePath(file));
+    expect((await migrationResolver.getFileNames()).length).toEqual(0);
   });
 
   it('Should create migration and run UP', async () =>
@@ -207,6 +209,45 @@ describe('Global Xmigrate Tests', () => {
   it('Should crash UP migration', async () => {
     StartMigrationWithCrash('down');
   });
+
+  it('Should create migration and try to get status PENDING', async () => {
+    const filePath = await migrationService.createWithTemplate(
+      'typescript',
+      'pesho1234'
+    );
+    const res = await migrationService.status();
+    expect(filePath).toBeTruthy();
+    expect(res.status).toBeTruthy();
+    expect(res.result.length).toBe(1);
+    expect(res.result[0].fileName.includes('pesho1234')).toBeTruthy();
+    expect(res.result[0].appliedAt).toBe('PENDING');
+    const isFileExists = await promisify(exists)(
+      migrationResolver.getFilePath(res.result[0].fileName)
+    );
+    expect(isFileExists).toBeTruthy();
+  });
+
+  it('Should test printStatus method', async () => {
+    const spy = spyOn(console, 'log');
+    await migrationService.printStatus([{appliedAt: new Date(), fileName: 'dada', result: []}]);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('Should test printStatus table method', async () => {
+    const spy = spyOn(console, 'log');
+    await migrationService.printStatus([{appliedAt: new Date(), fileName: 'dada', result: []}], 'table');
+    expect(spy).toHaveBeenCalled();
+  });
+
+
+  it('Should create template and createWithTemplate method should be called', async () => {
+    const spy = spyOn(console, 'log');
+    const spyCreateWithTemplate = spyOn(migrationService, 'createWithTemplate').and.callFake(() => 'pesho');
+    await migrationService.create({ name: 'pesho' , template: 'typescript'});
+    expect(spy).toHaveBeenCalled();
+    expect(spyCreateWithTemplate).toHaveBeenCalled();
+  });
+
   afterAll(async () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
     try {

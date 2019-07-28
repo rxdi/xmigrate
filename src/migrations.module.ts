@@ -106,18 +106,24 @@ export class MigrationsModule {
             } catch (e) {}
             await ensureDir(configService.config.logger.folder);
             await ensureDir(configService.config.migrationsDir);
+            let hasCrashed: boolean;
             if (command === 'create') {
-              return runner.run(command, {
+              hasCrashed = await runner.run(command, {
                 name: argv[1],
                 template: nextOrDefault('--template', null)
               });
-            }
-            if (command === 'up') {
-              return runner.run(command, {
+            } else if (command === 'up') {
+              hasCrashed = await runner.run(command, {
                 rollback: includes('--rollback')
               });
+            } else {
+              hasCrashed = await runner.run(command);
             }
-            await runner.run(command);
+
+            if (hasCrashed) {
+              return process.exit(1);
+            }
+            process.exit(0);
           }
         }
       ]

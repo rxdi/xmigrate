@@ -36,7 +36,7 @@ export class MigrationsResolver {
   ): Promise<MigrationSchema> {
     let migration: MigrationSchema;
     if (this.isTypescript(fileName)) {
-      migration = await this.loadTsMigration(fileName);
+      migration = await this.loadTsCompiledMigration(fileName);
     } else {
       migration = require('esm')(module)(this.getFilePath(fileName));
     }
@@ -72,7 +72,7 @@ export class MigrationsResolver {
     return new Promise(resolve => unlink(path, () => resolve(true)));
   }
 
-  async loadTsMigration(fileName: string) {
+  async loadTsCompiledMigration(fileName: string) {
     return require(this.getTsCompiledFilePath(fileName));
   }
 

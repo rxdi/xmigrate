@@ -1,13 +1,11 @@
 import { ReturnType, Tasks, MigrationSchema } from '../../injection.tokens';
-import { normalize, join } from 'path';
+import { normalize } from 'path';
 import chalk from 'chalk';
 import { LogFactory } from '../../helpers/log-factory';
 import { Injectable } from '@rxdi/core';
 import { MigrationService } from '../migration/migration.service';
 import { ConfigService } from '../config/config.service';
 import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
-import { promisify } from 'util';
-import { rmdir } from 'fs';
 
 @Injectable()
 export class GenericRunner {
@@ -28,6 +26,7 @@ export class GenericRunner {
     if (!this.tasks.has(name)) {
       throw new Error('\n🔥  Missing command');
     }
+    let hasCrashed: boolean;
     try {
       const res = await this.tasks.get(name)(args);
       if (res && res.status && res.result.length) {
@@ -47,8 +46,7 @@ export class GenericRunner {
         )}
         `);
       }
-
-      setTimeout(() => process.exit(0), 0);
+      hasCrashed = false;
     } catch (e) {
       console.error(`
       \n🔥  ${chalk.bold('Status: Operation executed with error')}
@@ -59,20 +57,16 @@ export class GenericRunner {
         try {
           await this.rollback(e.fileName);
         } catch (err) {
-          console.log('\n🔥  Migration rollback exited with error  ', err);
+          console.error('\n🔥  Migration rollback exited with error  ', err);
           this.logger.getDownLogger().error({
             errorMessage: err.message,
             fileName: e.fileName
           });
         }
       }
-      setTimeout(() => process.exit(1), 0);
+      hasCrashed = true;
     }
-    try {
-      await promisify(rmdir)(
-        join(process.cwd(), this.configService.config.outDir)
-      );
-    } catch (e) {}
+    return hasCrashed;
   }
 
   private async rollback(fileName: string) {
@@ -95,7 +89,7 @@ export class GenericRunner {
 
     let migration: MigrationSchema;
     if (this.resolver.isTypescript(fileName)) {
-      migration = await this.resolver.loadTsMigration(fileName);
+      migration = await this.resolver.loadTsCompiledMigration(fileName);
     } else {
       migration = require(migrationPath);
     }
@@ -114,7 +108,7 @@ export class GenericRunner {
 
   bind(self: MigrationService) {
     // Binds appropriate `this` to tasks
-    Array.from(this.tasks.keys()).map(k =>
+    Array.from(this.tasks.keys()).map((k: string) =>
       this.tasks.set(k, this.tasks.get(k).bind(self))
     );
     return this;
