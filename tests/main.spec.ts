@@ -233,7 +233,7 @@ describe('Global Xmigrate Tests', () => {
   it('Should create migration and run DOWN', async () =>
     await TestMigration('down', false));
 
-  it('Should create migration and test complete flow UP migration', async () =>
+    it('Should create migration and test complete flow UP migration', async () =>
     StartMigration('up'));
 
   it('Should create migration and test complete flow DOWN migration', async () =>
@@ -379,6 +379,31 @@ describe('Global Xmigrate Tests', () => {
       migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
     );
   });
+
+  it('Should check if UP will throw with specific context', async () => {
+    await migrationService.createWithTemplate(
+      ErrorTemplate as 'typescript',
+      'pesho1234',
+      { raw: true, typescript: true }
+    );
+    spyOn(databaseService, 'connect').and.callFake(() =>
+      FakeMongoClient(true)
+    );
+    try {
+      await migrationService.up();
+    } catch (e) {
+      expect(e.message).toBe('write after end');
+    }
+    const fileNames = await migrationResolver.getFileNames();
+    await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(fileNames[0])
+    );
+    await migrationResolver.delete(
+      migrationResolver.getTsCompiledFilePath(`${fileNames[0]}.map`)
+    );
+  });
+
 
   afterAll(async () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);

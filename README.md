@@ -499,3 +499,10 @@ export default async () => {
   };
 };
 ```
+
+### Performance tests
+
+Running `migrations` for less than 15 seconds in Typescript.
+
+Check [this](https://cloudflare-ipfs.com/ipfs/QmRsE9cRLxeVrya3eZUAheMRoxrM1RKn8MQwbczpicpvxK) video inside IPFS network
+

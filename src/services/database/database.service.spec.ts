@@ -67,6 +67,11 @@ describe('Database service', () => {
     expect(spy).toHaveBeenCalled();
   });
 
+  it('Should get mongo client', async () => {
+    const connection = await database.getMongoClient();
+    expect(connection).toBeInstanceOf(Function);
+  });
+
   it('Should connect with mongoose', async () => {
     class MongooseConnect {}
     const spy = spyOn(database, 'mongooseConnect').and.callFake(
