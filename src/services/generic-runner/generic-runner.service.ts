@@ -58,7 +58,7 @@ export class GenericRunner {
           await this.rollback(e.fileName);
         } catch (err) {
           console.error('\n🔥  Migration rollback exited with error  ', err);
-          this.logger.getDownLogger().error({
+          await this.logger.getDownLogger().error({
             errorMessage: err.message,
             fileName: e.fileName
           });
@@ -102,7 +102,7 @@ export class GenericRunner {
         'Rallback operation success, nothing changed if written correctly!'
       )}`
     );
-    logger.log(response);
+    await logger.log(response);
     return response;
   }
 

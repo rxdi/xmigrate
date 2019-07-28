@@ -185,6 +185,7 @@ describe('Global Xmigrate Tests', () => {
   afterEach(async () => {
     await logFactory.closeConnections();
     await databaseService.close();
+    await logFactory.closeConnections();
   });
 
   it('Should inject appropriate config', async () => {
@@ -386,13 +387,14 @@ describe('Global Xmigrate Tests', () => {
       'pesho1234',
       { raw: true, typescript: true }
     );
-    spyOn(databaseService, 'connect').and.callFake(() =>
+    const spy = spyOn(migrationService, 'connect').and.callFake(() =>
       FakeMongoClient(true)
     );
     try {
       await migrationService.up();
     } catch (e) {
-      expect(e.message).toBe('write after end');
+      expect(spy).toHaveBeenCalled();
+      expect(e.message).toBe('This is error from UP migration');
     }
     const fileNames = await migrationResolver.getFileNames();
     await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));

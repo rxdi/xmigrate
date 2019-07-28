@@ -6,6 +6,8 @@ import { createWriteStream, WriteStream } from 'fs';
 export class Logger {
   successLogger: WriteStream;
   errorLogger: WriteStream;
+  errorFinished: boolean;
+  successFinished: boolean;
   constructor(successPath: string, errorPath: string) {
     this.successLogger = createWriteStream(successPath, {
       flags: 'a'
@@ -13,12 +15,30 @@ export class Logger {
     this.errorLogger = createWriteStream(errorPath, {
       flags: 'a'
     });
+    this.successLogger.on('finish', () => {
+      this.successFinished = true;
+      console.log('All writes are now complete. for Success logger');
+    });
+    this.errorLogger.on('finish', () => {
+      this.errorFinished = true;
+      console.log('All writes are now complete. for Error logger');
+    });
   }
   log(res: unknown) {
-    this.successLogger.write(this.getLogTemplate(res, '🚀'));
+    return new Promise(resolve => {
+      if (!this.successFinished) {
+        return this.successLogger.write(this.getLogTemplate(res, '🚀'), resolve);
+      }
+      resolve();
+    });
   }
   error(res: unknown) {
-    this.errorLogger.write(this.getLogTemplate(res, '🔥'));
+    return new Promise(resolve => {
+      if (!this.errorFinished) {
+        return this.errorLogger.write(this.getLogTemplate(res, '🔥'), resolve);
+      }
+      resolve();
+    });
   }
 
   close() {

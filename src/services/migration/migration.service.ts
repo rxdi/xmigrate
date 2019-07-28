@@ -54,7 +54,7 @@ export class MigrationService {
         const error = new ErrorMap(err.message);
         error.fileName = item.fileName;
         error.migrated = migrated;
-        logger.error({
+        await logger.error({
           migrated,
           errorMessage: error.message,
           fileName: item.fileName
@@ -70,7 +70,7 @@ export class MigrationService {
       try {
         await collection.insertOne({ fileName, appliedAt });
       } catch (err) {
-        logger.error({
+        await logger.error({
           migrated,
           errorMessage: err.message,
           fileName: item.fileName
@@ -82,7 +82,7 @@ export class MigrationService {
         appliedAt,
         result
       };
-      logger.log(res);
+      await logger.log(res);
       migrated.push(res);
       return await true;
     };
@@ -95,7 +95,6 @@ export class MigrationService {
   }
 
   async down() {
-
     const downgraded: ReturnType[] = [];
     const statusItems = await this.statusInternal();
 
@@ -129,7 +128,7 @@ export class MigrationService {
         const error = new ErrorMap(err.message);
         error.fileName = lastAppliedItem.fileName;
         error.downgraded = downgraded;
-        logger.error({
+        await logger.error({
           downgraded,
           errorMessage: err.message,
           fileName: lastAppliedItem.fileName
@@ -146,10 +145,10 @@ export class MigrationService {
           appliedAt: new Date(),
           result
         };
-        logger.log(res);
+        await logger.log(res);
         downgraded.push(res);
       } catch (err) {
-        logger.error({
+        await logger.error({
           downgraded,
           errorMessage: err.message,
           fileName: lastAppliedItem.fileName
