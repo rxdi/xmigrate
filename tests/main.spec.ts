@@ -47,8 +47,8 @@ function FakeMongoClient(response: unknown) {
   return {
     db: () => ({
       collection: () => ({
-        insertOne: () => null,
-        find: () => ({ toArray: () => [] }),
+        insertOne: () => [''],
+        find: () => ({ toArray: () => [''] }),
         updateOne: () => ({ response }),
         deleteOne: () => ({ response })
       })
@@ -78,7 +78,7 @@ describe('Global Xmigrate Tests', () => {
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
       FakeMongoClient(response)
     );
-    const res = await migration[type](await databaseService.connect());
+    const res: any = await migration[type](await databaseService.connect());
     expect(res['response']).toEqual(response);
     expect(spy).toHaveBeenCalled();
     await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
@@ -210,7 +210,7 @@ describe('Global Xmigrate Tests', () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
     try {
       await promisify(rmdir)(
-        join(process.cwd(), this.configService.config.outDir)
+        join(process.cwd(), config.outDir)
       );
     } catch (e) {}
   });

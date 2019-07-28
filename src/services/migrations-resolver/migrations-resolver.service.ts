@@ -16,10 +16,12 @@ export class MigrationsResolver {
     )).filter(file => extname(file) === '.js' || this.isTypescript(file));
   }
 
+  readDir() {
+    return promisify(readdir)(this.configService.config.outDir);
+  }
+
   async getDistFileNames() {
-    return (await promisify(readdir)(
-      this.configService.config.outDir
-    ))
+    return (await this.readDir())
       .filter(file => extname(file) === '.js')
       .map(f => this.getTsCompiledFilePath(f));
   }
@@ -53,10 +55,8 @@ export class MigrationsResolver {
     return this.getFilePath(fileName).replace(process.cwd(), '');
   }
 
-  async clean(migrations: string[] = []) {
-    if (!migrations.length) {
-      migrations = await this.getFileNames();
-    }
+  async clean(migrations: string[]) {
+    migrations = migrations || await this.getFileNames();
     await Promise.all(
       migrations.map(fileName => this.deleteArtefacts(fileName))
     );
@@ -84,9 +84,11 @@ export class MigrationsResolver {
   }
 
   getTsCompiledFilePath(fileName: string) {
-    return join(process.cwd(), this.configService.config.outDir, this.replaceFilenameJsWithTs(
-      fileName
-    ));
+    return join(
+      process.cwd(),
+      this.configService.config.outDir,
+      this.replaceFilenameJsWithTs(fileName)
+    );
   }
 
   replaceFilenameJsWithTs(fileName: string) {
