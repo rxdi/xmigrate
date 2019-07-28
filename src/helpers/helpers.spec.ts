@@ -1,7 +1,9 @@
 import { nextOrDefault, includes } from './args-extractors';
 import { LogFactory } from './log-factory';
-import { Container, createTestBed } from '@rxdi/core';
+import { createTestBed } from '@rxdi/core';
 import { Config, LoggerConfig } from '../injection.tokens';
+import { unlink } from 'fs';
+import { promisify } from 'util';
 
 const config = {
   changelogCollectionName: 'migrations',
@@ -113,12 +115,12 @@ describe('Helpers', () => {
     process.argv.pop();
   });
 
-  it('Should log error and execute error with logFactory', () => {
-    const logFactory = Container.get(LogFactory);
-    class FakeLogger {
-      error() {}
-    }
-    const spyCreate = spyOn(logFactory, 'create').and.callFake(() => new FakeLogger());
+  it('Should log error and execute error with logFactory', async () => {
+    const logFactory = new LogFactory(config.logger);
+    logFactory.create('pesho', {
+      errorPath: './test.error.log',
+      successPath: './test.succes.log'
+    });
     logFactory.create('pesho', {
       errorPath: './test.error.log',
       successPath: './test.succes.log'
@@ -128,6 +130,7 @@ describe('Helpers', () => {
       successPath: './test.succes.log'
     });
     log.error('omg');
-    expect(spyCreate).toHaveBeenCalled();
+    await promisify(unlink)('./test.error.log');
+    await promisify(unlink)('./test.succes.log');
   });
 });

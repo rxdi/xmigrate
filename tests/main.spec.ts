@@ -214,6 +214,21 @@ describe('Global Xmigrate Tests', () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
   });
 
+  it('Should create ES6 migration and load it', async () => {
+    const filePath = await migrationService.createWithTemplate(
+      'es6',
+      'pesho1234'
+    );
+    const [file] = await migrationResolver.getFileNames();
+    expect(migrationResolver.getRelativePath(file)).toEqual(filePath);
+    const migration = await migrationResolver.loadMigration(file);
+    expect(migration.up).toBeDefined();
+    expect(migration.down).toBeDefined();
+    await migrationResolver.delete(migrationResolver.getFilePath(file));
+    expect((await migrationResolver.getFileNames()).length).toEqual(0);
+  });
+
+
   it('Should create migration and run UP', async () =>
     await TestMigration('up', true));
   it('Should create migration and run DOWN', async () =>
