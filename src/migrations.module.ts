@@ -13,7 +13,7 @@ import { DEFAULT_CONFIG } from './default.config';
 import { ConfigService } from './services/config/config.service';
 import { ensureDir } from './helpers';
 import { promisify } from 'util';
-import { exists, unlink } from 'fs';
+import { exists, unlink, stat, readFile, writeFile, Stats } from 'fs';
 import { TranspileTypescript } from './helpers/typescript-builder';
 import { join } from 'path';
 import { MigrationsResolver } from './services/migrations-resolver/migrations-resolver.service';
@@ -77,21 +77,47 @@ export class MigrationsModule {
               let settings: any;
               const configFilename = 'xmigrate';
               if (await promisify(exists)(`./${configFilename}.ts`)) {
-                await TranspileTypescript(
-                  [`/${configFilename}.ts`],
-                  config.outDir
+                const isMigrateTempConfigExists = await promisify(exists)(
+                  './.xmigrate/config.temp'
                 );
+                const TranspileAndWriteTemp = async (stats: Stats) => {
+                  await TranspileTypescript(
+                    [`/${configFilename}.ts`],
+                    config.outDir
+                  );
+                  console.log('Transpile complete!');
+                  await promisify(writeFile)(
+                    './.xmigrate/config.temp',
+                    stats.mtime.toISOString(),
+                    { encoding: 'utf-8' }
+                  );
+                };
+                const stats = await promisify(stat)(`./${configFilename}.ts`);
+                if (isMigrateTempConfigExists) {
+                  const temp = await promisify(readFile)(
+                    './.xmigrate/config.temp',
+                    { encoding: 'utf-8' }
+                  );
+                  if (
+                    new Date(temp).toISOString() !== stats.mtime.toISOString()
+                  ) {
+                    console.log('Xmigrate configuration is new transpiling...');
+                    await TranspileAndWriteTemp(stats);
+                  }
+                } else {
+                  console.log('Transpile xmigrate.ts...');
+                  await TranspileAndWriteTemp(stats);
+                }
                 settings = require(join(
                   process.cwd(),
                   `./${config.outDir}`,
                   `${configFilename}.js`
                 ));
-                await promisify(unlink)(
-                  join('./', config.outDir, 'xmigrate.js')
-                );
-                await promisify(unlink)(
-                  join('./', config.outDir, 'xmigrate.js.map')
-                );
+                try {
+                  await promisify(unlink)(
+                    join('./', config.outDir, 'xmigrate.js.map')
+                  );
+                } catch (e) {}
               } else {
                 settings = require('esm')(module)(`./${configFilename}.js`);
               }

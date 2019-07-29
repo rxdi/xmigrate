@@ -343,13 +343,11 @@ Up Migration Error log
 ```
 
 
-# Beta
-
-Typescript configuration
+# Typescript configuration
 
 When you change your configuration file to `xmigrate.ts` it will automatically `Transpile` to `ES5` and will be loaded
 
-This type of configuration requires `@gapi/cli` to be installed since we will `transpile` configuration with it!
+This type of configuration requires `@gapi/cli` to be installed since we will `Transpile` configuration with it!
 
 ```bash
 npm i -g @gapi/cli
@@ -387,6 +385,14 @@ export default async (): Promise<Config> => {
 };
 
 ```
+
+Everytime `xmigrate.ts` is loaded `timestamp` is check wheather or not this file is changed
+
+This information is saved inside `.xmigrate/config.temp` like a regular `Date` object
+
+This will ensure that we don't need to `Transpile` configuration if it is not changed inside `xmigrate.ts` file
+
+Basically this is `Caching` to improove performance and user experience with Typescript configuration
 
 
 
@@ -502,7 +508,7 @@ export default async () => {
 
 ### Performance tests
 
-Running `migrations` for less than 15 seconds in Typescript.
+Running 600 `migrations` for less than 15 seconds in Typescript compiled right down to Javascript ES5.
 
 Check [this](https://cloudflare-ipfs.com/ipfs/QmRsE9cRLxeVrya3eZUAheMRoxrM1RKn8MQwbczpicpvxK) video inside IPFS network
 
