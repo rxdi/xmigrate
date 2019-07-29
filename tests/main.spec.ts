@@ -333,6 +333,18 @@ describe('Global Xmigrate Tests', () => {
     expect(spyCreateWithTemplate).toHaveBeenCalled();
   });
 
+
+  it('Should create template and createWithTemplate method should be called', async () => {
+    const spy = spyOn(console, 'log');
+    const spyCreateWithTemplate = spyOn(
+      migrationService,
+      'createWithTemplate'
+    ).and.callFake(() => 'pesho');
+    await migrationService.create({ name: 'pesho' } as any);
+    expect(spy).toHaveBeenCalled();
+    expect(spyCreateWithTemplate).toHaveBeenCalled();
+  });
+
   it('Should throw error if provided template is missing', async () => {
     try {
       await migrationService.create({

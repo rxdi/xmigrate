@@ -1,7 +1,7 @@
 import { createTestBed, Container } from '@rxdi/core';
 import { DatabaseService } from './database.service';
 import { ConfigService } from '../config/config.service';
-import { MongoClientMockUp } from '../../../tests/helpers';
+import { MongoClientMockUp, FakeMongoClient } from '../../../tests/helpers';
 
 describe('Database service', () => {
   let database: DatabaseService;
@@ -16,7 +16,7 @@ describe('Database service', () => {
     config.set({
       outDir: '',
       mongodb: {
-        url: 'test',
+        url: 'mongodb://localhost:27017',
         databaseName: 'test',
         options: {
           useNewUrlParser: true
@@ -73,13 +73,22 @@ describe('Database service', () => {
   });
 
   it('Should connect with mongoose', async () => {
-    class MongooseConnect {}
-    const spy = spyOn(database, 'mongooseConnect').and.callFake(
-      () => new MongooseConnect()
-    );
+    const spy = spyOn(database, 'connectMongoose').and.callFake(() => (() => ({disconnect: () => {}})));
     const connection = await database.mongooseConnect();
-    expect(connection).toBeInstanceOf(MongooseConnect);
+    database.closeMongoose();
     expect(spy).toHaveBeenCalled();
+    expect(connection).toBeInstanceOf(Object);
+  });
+
+  it('Should disconnect from mongodb', async () => {
+    const connection = await database.connections.set('dada', FakeMongoClient(true) as any);
+    database.close();
+    expect(connection).toBeInstanceOf(Object);
+  });
+
+  it('Should connect to mongoose', async () => {
+    const connection = await database.connectMongoose();
+    expect(connection).toBeInstanceOf(Function);
   });
 
 });

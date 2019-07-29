@@ -1,11 +1,13 @@
 import { Injectable } from '@rxdi/core';
 import { MongoClient } from 'mongodb';
-import { connect } from 'mongoose';
+import { connect, Mongoose } from 'mongoose';
 import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class DatabaseService {
   connections: Map<string, MongoClient> = new Map();
+  connectionsMongoose: Map<string, Mongoose> = new Map();
+
   constructor(private configService: ConfigService) {}
   async connect() {
     const url = this.configService.config.mongodb.url;
@@ -26,7 +28,7 @@ export class DatabaseService {
     );
     const originalDb = client.db.bind(client);
     client.db = (dbName?: string) => originalDb(dbName || databaseName);
-    this.connections.set(url, client);
+    this.setConnections(url, client);
     return client;
   }
 
@@ -38,12 +40,31 @@ export class DatabaseService {
     await Promise.all([...this.connections.values()].map(c => c.close(true)));
   }
 
-  mongooseConnect() {
-    return connect(
-      `${this.configService.config.mongodb.url}/${
-        this.configService.config.mongodb.databaseName
-      }`,
+  async closeMongoose() {
+    await Promise.all([...this.connectionsMongoose.values()].map(c => c.disconnect()));
+  }
+
+  setConnections(url: string, client: MongoClient) {
+    this.connections.set(url, client);
+  }
+
+  setConnectionsMongoose(url: string, client: Mongoose) {
+    this.connectionsMongoose.set(url, client);
+  }
+
+  connectMongoose() {
+    return connect;
+  }
+
+  async mongooseConnect() {
+    const url = `${this.configService.config.mongodb.url}/${
+      this.configService.config.mongodb.databaseName
+    }`;
+    const connection = await this.connectMongoose()(
+      url,
       this.configService.config.mongodb.options
     );
+    this.setConnectionsMongoose(url, connection);
+    return connection;
   }
 }

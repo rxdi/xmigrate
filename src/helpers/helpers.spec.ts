@@ -115,6 +115,13 @@ describe('Helpers', () => {
     process.argv.pop();
   });
 
+
+  it('Next or default will be true if no value is provided', () => {
+    process.argv.push('up');
+    expect(nextOrDefault('up')).toBe(true);
+    process.argv.pop();
+  });
+
   it('Should log error and execute error with logFactory', async () => {
     const logFactory = new LogFactory(config.logger);
     logFactory.create('pesho', {
@@ -129,7 +136,9 @@ describe('Helpers', () => {
       errorPath: './test.error.log',
       successPath: './test.succes.log'
     });
-    log.error('omg');
+    await log.error('omg');
+    log.successFinished = true;
+    await log.log('omg');
     await promisify(unlink)('./test.error.log');
     await promisify(unlink)('./test.succes.log');
   });

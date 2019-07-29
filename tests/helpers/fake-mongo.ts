@@ -20,6 +20,7 @@ function FakeDatabase(response: unknown, databaseName: string) {
 }
 
 export class MongoClientMockUp {
+  close =  () => {};
   constructor(private response: unknown, private databaseName: string) {}
   connect() {
     return new MongoClientMockUp(this.response, this.databaseName);
@@ -50,13 +51,14 @@ export function TestCollectionMongoWrongCollection(response: unknown, data: Retu
     }),
     updateOne: () => ({ response }),
     deleteOne: () => {
-      throw new Error('Cannot delete inside this mongo collection')
+      throw new Error('Cannot delete inside this mongo collection');
     }
   };
 }
 
 export function FakeMongoClient(response: unknown, data: ReturnType[] = []) {
   return {
+    close: () => {},
     connect: () => {},
     db: () => ({
       collection: () => TestCollectionMongo(response, [...data])

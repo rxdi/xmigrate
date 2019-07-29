@@ -56,7 +56,6 @@ export class MigrationsResolver {
   }
 
   async clean(migrations: string[]) {
-    migrations = migrations || (await this.getFileNames());
     await Promise.all(
       migrations.map(fileName => this.deleteArtefacts(fileName))
     );

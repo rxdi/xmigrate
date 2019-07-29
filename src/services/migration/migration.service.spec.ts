@@ -28,7 +28,7 @@ const config = {
     }
   }
 };
-describe('Global Xmigrate Tests', () => {
+describe('Migration Service', () => {
   let migrationService: MigrationService;
   let databaseService: DatabaseService;
   beforeAll(
@@ -56,7 +56,7 @@ describe('Global Xmigrate Tests', () => {
   it('Should connect to mongoose and mongodb with single connect method', async () => {
     const spyMongo = spyOn(databaseService, 'connect').and.callFake(() => ({}));
     const spyMongoose = spyOn(databaseService, 'mongooseConnect').and.callFake(
-      () => ({})
+      () => (() => ({}))
     );
     await migrationService.connect();
     expect(spyMongo).toHaveBeenCalled();
