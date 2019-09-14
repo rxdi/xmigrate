@@ -101,7 +101,7 @@ export class MigrationsModule {
                   if (
                     new Date(temp).toISOString() !== stats.mtime.toISOString()
                   ) {
-                    console.log('Xmigrate configuration is new transpiling...');
+                    console.log('Xmigrate configuration has changed transpiling...');
                     await TranspileAndWriteTemp(stats);
                   }
                 } else {
@@ -119,7 +119,7 @@ export class MigrationsModule {
                   );
                 } catch (e) {}
               } else {
-                settings = require('esm')(module)(`./${configFilename}.js`);
+                settings = require('esm')(module)(join(process.cwd(), `./${configFilename}.js`));
               }
               if (settings.default) {
                 settings = await (settings as {
@@ -134,12 +134,12 @@ export class MigrationsModule {
             await ensureDir(configService.config.migrationsDir);
             let hasCrashed: boolean;
             if (command === 'create') {
-              hasCrashed = await runner.run(command, {
+              hasCrashed = await runner.run('create', {
                 name: argv[1],
                 template: nextOrDefault('--template', null)
               });
             } else if (command === 'up') {
-              hasCrashed = await runner.run(command, {
+              hasCrashed = await runner.run('up', {
                 rollback: includes('--rollback')
               });
             } else {
