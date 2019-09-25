@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/xmigrate",
-  "version": "0.7.19",
+  "version": "0.7.20",
   "main": "./dist/main.js",
   "author": "Kristiyan Tachev",
   "license": "MIT",
@@ -19,25 +19,25 @@
     "xmigrate": "./dist/main.js"
   },
   "dependencies": {
-    "@rxdi/core": "^0.7.19",
-    "chalk": "^2.4.2",
-    "date-fns": "^1.30.1",
-    "esm": "^3.2.25",
-    "mongodb": "^3.3.0-beta2",
-    "mongoose": "^5.6.6"
+    "@rxdi/core": "0.7.19",
+    "chalk": "2.4.2",
+    "date-fns": "1.30.1",
+    "esm": "3.2.25",
+    "mongodb": "3.3.2",
+    "mongoose": "5.6.6"
   },
   "devDependencies": {
     "@rxdi/parcel-plugin-shebang": "0.7.5",
-    "@types/chalk": "^2.2.0",
-    "@types/jest": "^24.0.15",
-    "@types/mongodb": "^3.1.30",
-    "@types/mongoose": "^5.5.9",
-    "@types/node": "^12.6.8",
-    "coveralls": "^3.0.5",
-    "jest": "^24.8.0",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.3"
+    "@types/chalk": "2.2.0",
+    "@types/jest": "24.0.15",
+    "@types/mongodb": "3.1.30",
+    "@types/mongoose": "5.5.9",
+    "@types/node": "12.6.8",
+    "coveralls": "3.0.5",
+    "jest": "24.8.0",
+    "ts-jest": "24.0.2",
+    "tslint": "5.18.0",
+    "typescript": "3.5.3"
   },
   "jest": {
     "testEnvironment": "node",
