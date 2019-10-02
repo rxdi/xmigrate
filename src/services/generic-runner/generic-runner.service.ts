@@ -33,7 +33,7 @@ export class GenericRunner {
         console.log(`
           \n🔥  There are ${chalk.red(
             res.result.length
-          )} migration with status '${chalk.red('PENDING')}' run '${chalk.green(
+          )} migrations with status '${chalk.red('PENDING')}', run '${chalk.green(
           `xmigrate up`
         )}' command!
           `);
@@ -41,7 +41,7 @@ export class GenericRunner {
         console.log(`
         \n🚀  ${chalk.green.bold(
           res && res.length
-            ? `Success! Runned ${res.length} migrations.`
+            ? `Success! Ran ${res.length} migrations.`
             : 'Already up to date'
         )}
         `);
@@ -81,7 +81,7 @@ export class GenericRunner {
     );
 
     console.log(`
-\n🙏  ${chalk.bold('Status: Executing rallback operation')} ${chalk.red(
+\n🙏  ${chalk.bold('Status: Executing rollback operation')} ${chalk.red(
       'xmigrate down'
     )}
 📁  ${chalk.bold('Migration:')} ${migrationPath}
@@ -99,7 +99,7 @@ export class GenericRunner {
     response.appliedAt = new Date();
     console.log(
       `\n🚀  ${chalk.green(
-        'Rallback operation success, nothing changed if written correctly!'
+        'Rollback operation success, nothing changed if written correctly!'
       )}`
     );
     await logger.log(response);

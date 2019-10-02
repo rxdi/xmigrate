@@ -3,20 +3,20 @@
 [![Build Status](https://travis-ci.org/rxdi/xmigrate.svg?branch=master)](https://travis-ci.org/rxdi/xmigrate)
 [![Coverage Status](https://coveralls.io/repos/github/rxdi/xmigrate/badge.svg?branch=master)](https://coveralls.io/github/rxdi/xmigrate?branch=master)
 
-Migration library for `Mongodb` and `Mongoose` written in `typescript`
+Migration library for `Mongodb` and `Mongoose` written in `TypeScript`
 
 ## Features
 
 * Simple UI/UX
 * Rollback support
 * Templates for migrations
-* Typescript/Javascript compatible
+* TypeScript/JavaScript compatible
 * `async`/`await` configuration loader
-* Mongoose and Mongodb compatability
-* ACID Transactions provided by MongoDB
+* Mongoose and Mongodb compatibility
+* ACID transactions provided by MongoDB
 * `error` and `success` logs for `up`/`down` migrations 
-* Infinite Error log with `append` nodejs streaming technique
-* 100% Typescript support with JIT Compilation provided by [@gapi/cli](https://github.com/Stradivario/gapi-cli) and [ParcelJS](https://parceljs.org)
+* Infinite rrror log with `append` NodeJS streaming technique
+* 100% TypeScript support with JIT compilation provided by [@gapi/cli](https://github.com/Stradivario/gapi-cli) and [ParcelJS](https://parceljs.org)
 
 ## Installation
 
@@ -34,7 +34,7 @@ xmigrate init
 
 Manual configuration
 
-You can define `xmigrate.js` file where you execute command `xmigrate`
+You can create a `xmigrate.js` file where you execute the `xmigrate` command:
 
 ```typescript
 export default async () => {
@@ -94,7 +94,7 @@ xmigrate create "my-migration" --template typescript
 
 #### Up migrations
 
-Will execute all migrations which are with status `PENDING`
+Will execute all migrations which have the status `PENDING`
 
 ```bash
 xmigrate up
@@ -108,7 +108,7 @@ xmigrate up --rollback
 
 #### Down migrations
 
-Will execute migrations one by one starting from the last created by tamstamp
+Will execute migrations one by one starting from the last created by timestamp
 
 ```bash
 xmigrate down
@@ -120,8 +120,8 @@ xmigrate down
 xmigrate status
 ```
 
-Will print inside the console a `table`
-When there is a `PENDING` flag these migrations where not runned against current database.
+Will print inside the console a table.
+When there is a `PENDING` flag these migrations were not running against the current database.
 
 ```bash
 🖥️  Database: test
@@ -143,12 +143,12 @@ When there is a `PENDING` flag these migrations where not runned against current
 │    3    │ '20190725160013-pesho.js' │         'PENDING'          │
 └─────────┴───────────────────────────┴────────────────────────────┘
 
-🔥  There are 3 migration with status 'PENDING' run 'xmigrate up' command!
+🔥  There are 3 migrations with status 'PENDING', run 'xmigrate up' command!
 ```
 
 ## Migration templates
 
-`Native` mongo driver template
+Native mongo driver template
 
 ```typescript
 module.exports = {
@@ -234,9 +234,9 @@ export async function down(client: MongoClient) {
 }
 ```
 
-## Typescript migrations
+## TypeScript migrations
 
-To be able to run Migrations with typescript you need to set `typescript: true` inside `xmigrate.js` and install `@gapi/cli` globally
+To be able to run migrations with TypeScript you need to set `typescript: true` inside `xmigrate.js` and install `@gapi/cli` globally
 
 Install `@gapi/cli` for runtime build using `glob`
 
@@ -244,14 +244,14 @@ Install `@gapi/cli` for runtime build using `glob`
 npm i -g @gapi/cli
 ```
 
-Command that will be runned internally
+Command that will be run internally
 ```bash
 npx gapi build --glob ./1-migration.ts,./2-migration.ts
 ```
 After success transpiled migration will be started from `./.xmigrate/1-migration.js`
 Before exit script will remove `artifacts` left from transpilation located inside `./.xmigrate` folder
 
-## Rallback
+## Rollback
 
 When executing command `xmigrate up --rollback` this will trigger immediate rollback to DOWN migration on the current crashed migration
 The log will look something like this:
@@ -273,11 +273,11 @@ The log will look something like this:
 📨  Message: AAA
       
 
-🙏  Status: Executing rallback operation xmigrate down
+🙏  Status: Executing rollback operation xmigrate down
 📁  Migration: /migrations/20190725160011-pesho.js
         
 
-🚀  Rallback operation success, nothing changed if written correctly!
+🚀  Rollback operation success, nothing changed if written correctly!
 ```
 
 
@@ -285,7 +285,7 @@ The log will look something like this:
 
 By default logs will append streaming content for every interaction made by migration
 
-Down Migration Success Log
+Down migration success Log
 
 ```json
 🚀 ********* Thu Jul 25 2019 11:23:06 GMT+0300 (Eastern European Summer Time) ********* 
@@ -302,7 +302,7 @@ Down Migration Success Log
 ```
 
 
-Down Migration Error log
+Down migration error log
 ```json
 🔥 ********* Thu Jul 25 2019 03:28:48 GMT+0300 (Eastern European Summer Time) ********* 
 
@@ -314,7 +314,7 @@ Down Migration Error log
 ```
 
 
-Up Migration Success log
+Up migration success log
 
 ```json
 🚀 ********* Thu Jul 25 2019 11:23:24 GMT+0300 (Eastern European Summer Time) ********* 
@@ -330,7 +330,7 @@ Up Migration Success log
 }
 ```
 
-Up Migration Error log
+Up migration error log
 
 ```json
 🔥 ********* Thu Jul 25 2019 03:39:00 GMT+0300 (Eastern European Summer Time) ********* 
@@ -343,11 +343,11 @@ Up Migration Error log
 ```
 
 
-# Typescript configuration
+# TypeScript configuration
 
-When you change your configuration file to `xmigrate.ts` it will automatically `Transpile` to `ES5` and will be loaded
+When you change your configuration file to `xmigrate.ts` it will automatically transpile to `ES5` and will be loaded
 
-This type of configuration requires `@gapi/cli` to be installed since we will `Transpile` configuration with it!
+This type of configuration requires `@gapi/cli` to be installed since we will transpile configuration with it!
 
 ```bash
 npm i -g @gapi/cli
@@ -386,13 +386,13 @@ export default async (): Promise<Config> => {
 
 ```
 
-Everytime `xmigrate.ts` is loaded `timestamp` is check wheather or not this file is changed
+Everytime `xmigrate.ts` is loaded `timestamp` is checked whether or not this file is changed
 
 This information is saved inside `.xmigrate/config.temp` like a regular `Date` object
 
-This will ensure that we don't need to `Transpile` configuration if it is not changed inside `xmigrate.ts` file
+This will ensure that we don't need to transpile configuration if it is not changed inside `xmigrate.ts` file
 
-Basically this is `Caching` to improove performance and user experience with Typescript configuration
+Basically this is caching to improve performance and user experience with TypeScript configuration
 
 
 
@@ -508,7 +508,7 @@ export default async () => {
 
 ### Performance tests
 
-Running 600 `migrations` for less than 15 seconds in Typescript compiled right down to Javascript ES5.
+Running 600 `migrations` takes less than 15 seconds in TypeScript compiled right down to Javascript ES5.
 
 Check [this](https://cloudflare-ipfs.com/ipfs/QmRsE9cRLxeVrya3eZUAheMRoxrM1RKn8MQwbczpicpvxK) video inside IPFS network
 
