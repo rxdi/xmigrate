@@ -19,12 +19,12 @@
     "xmigrate": "./dist/main.js"
   },
   "dependencies": {
-    "@rxdi/core": "^0.7.21",
+    "@rxdi/core": "0.7.32",
     "chalk": "2.4.2",
-    "date-fns": "1.30.1",
+    "date-fns": "2.6.0",
     "esm": "3.2.25",
-    "mongodb": "3.3.2",
-    "mongoose": "5.6.6"
+    "mongodb": "3.3.3",
+    "mongoose": "5.7.6"
   },
   "devDependencies": {
     "@rxdi/parcel-plugin-shebang": "0.7.5",

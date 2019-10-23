@@ -13,4 +13,4 @@ export const now = (dateString = Date.now()) => {
   );
 };
 
-export const nowAsString = () => format(now(), 'YYYYMMDDHHmmss');
+export const nowAsString = () => format(now(), 'yyyymmddhhmmss');
