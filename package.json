@@ -1,11 +1,11 @@
 {
   "name": "@rxdi/xmigrate",
-  "version": "0.7.37",
+  "version": "0.7.38",
   "main": "./dist/main.js",
   "author": "Kristiyan Tachev",
   "license": "MIT",
   "scripts": {
-    "build": "tsc && gapi build",
+    "build": "tsc && npx gapi build",
     "lint": "tslint -c tslint.json 'src/**/*.{ts,tsx}'",
     "pretest": "npm run lint",
     "coveralls": "cat ./coverage/lcov.info | coveralls",

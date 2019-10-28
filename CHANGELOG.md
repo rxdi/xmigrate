@@ -1,3 +1,5 @@
+* v0.7.38
+- Fixed [issue](https://github.com/rxdi/xmigrate/issues/7) with new date format `Use `yyyy` instead of `YYYY` for formatting years; see: https://git.io/fxCyr`
 
 * v0.7.16
 - Fixed bug with `npm ERR! enoent ENOENT: no such file or directory,`
