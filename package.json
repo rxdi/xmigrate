@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/xmigrate",
-  "version": "0.7.38",
+  "version": "0.7.41",
   "main": "./dist/main.js",
   "author": "Kristiyan Tachev",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "mongoose": "^5.7.6"
   },
   "devDependencies": {
-    "@rxdi/parcel-plugin-shebang": "0.7.38",
+    "@rxdi/parcel-plugin-shebang": "^0.7.38",
     "@types/chalk": "2.2.0",
     "@types/jest": "^24.0.22",
     "@types/mongodb": "3.1.30",
