@@ -1,3 +1,5 @@
+* v0.7.39
+- Fixed [issue](https://github.com/rxdi/xmigrate/issues/8) related with wrong format name when creating migration
 * v0.7.38
 - Fixed [issue](https://github.com/rxdi/xmigrate/issues/7) with new date format `Use `yyyy` instead of `YYYY` for formatting years; see: https://git.io/fxCyr`
 
