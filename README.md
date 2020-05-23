@@ -20,6 +20,24 @@ Migration library for `Mongodb` and `Mongoose` written in `TypeScript`
 
 ## Installation
 
+Using `binary`
+
+```bash
+wget https://github.com/rxdi/xmigrate/raw/master/dist/xmigrate-linux
+```
+
+Give it permission to execute
+
+```bash
+chmod +x xmigrate-linux
+```
+
+```bash
+./xmigrate up|down|create|etc
+```
+
+Using `NodeJS`
+
 ```bash
 npm i -g @rxdi/xmigrate
 ```
