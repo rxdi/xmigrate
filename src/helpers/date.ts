@@ -1,16 +1,19 @@
-import { format } from 'date-fns';
+export const formatDate = (date: Date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  let month = '' + (d.getMonth() + 1);
+  let day = '' + d.getDate();
+  const hours = '' + d.getUTCHours();
+  const minutes = '' + d.getUTCMinutes();
+  const seconds = '' + d.getUTCSeconds();
 
-export const now = (dateString = Date.now()) => {
-  const date = new Date(dateString);
-  return new Date(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate(),
-    date.getUTCHours(),
-    date.getUTCMinutes(),
-    date.getUTCSeconds(),
-    date.getUTCMilliseconds()
-  );
+  if (month.length < 2) {
+    month = '0' + month;
+  }
+  if (day.length < 2) {
+    day = '0' + day;
+  }
+  return [year, month, day, hours, minutes, seconds].join('');
 };
 
-export const nowAsString = () => format(now(), 'yyyymmddhhmmss');
+export const nowAsString = () => formatDate(new Date());
