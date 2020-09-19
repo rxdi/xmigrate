@@ -249,6 +249,7 @@ describe('Global Xmigrate Tests', () => {
 
   it('Should create migration and run UP', async () =>
     await TestMigration('up', true));
+    
   it('Should create migration and run DOWN', async () =>
     await TestMigration('down', false));
 
