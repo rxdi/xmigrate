@@ -1,0 +1,54 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish-gpr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            ~/.npm
+            **/node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Lint
+        run: npm run lint --if-present
+      - name: Run Tests
+        run: npm test --if-present
+      - name: Install @gapi/cli globally
+        run: npm i -g @gapi/cli
+
+      - run: git config --global user.email 'kristiqn.tachev@gmail.com'
+      - run: git config --global user.name "Kristiyan Tachev"
+      - run: npm config set '//registry.npmjs.org/:_authToken' "${{secrets.NPM_TOKEN}}"
+
+      - name: Build distribution
+        run: npm run build
+      - name: Patch version
+        run: npm version patch
+      - name: Publish version
+        run: npm publish --update-readme --access public --force
+        env:
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+      - uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

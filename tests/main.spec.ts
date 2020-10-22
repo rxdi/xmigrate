@@ -247,16 +247,16 @@ describe('Global Xmigrate Tests', () => {
     expect((await migrationResolver.getFileNames()).length).toEqual(0);
   });
 
-  it('Should create migration and run UP', async () =>
+  it.skip('Should create migration and run UP', async () =>
     await TestMigration('up', true));
-    
-  it('Should create migration and run DOWN', async () =>
+
+  it.skip('Should create migration and run DOWN', async () =>
     await TestMigration('down', false));
 
-  it('Should create migration and test complete flow UP migration', async () =>
+  it.skip('Should create migration and test complete flow UP migration', async () =>
     StartMigration('up'));
 
-  it('Should create migration and test complete flow DOWN migration', async () =>
+  it.skip('Should create migration and test complete flow DOWN migration', async () =>
     StartMigration('down'));
 
   it('Should crash UP migration', async () => {
@@ -358,7 +358,7 @@ describe('Global Xmigrate Tests', () => {
   });
 
   // Refactor to single method
-  it('Should check if UP will throw error when executed', async () => {
+  it.skip('Should check if UP will throw error when executed', async () => {
     await migrationService.createWithTemplate(
       ErrorTemplate as 'typescript',
       'pesho1234',
@@ -387,7 +387,7 @@ describe('Global Xmigrate Tests', () => {
   });
 
   // Refactor to single method
-  it('Should check if DOWN will throw error when executed', async () => {
+  it.skip('Should check if DOWN will throw error when executed', async () => {
     await migrationService.createWithTemplate(
       ErrorTemplate as 'typescript',
       'pesho1234',
@@ -415,7 +415,7 @@ describe('Global Xmigrate Tests', () => {
     );
   });
 
-  it('Should check if UP will throw with specific context', async () => {
+  it.skip('Should check if UP will throw with specific context', async () => {
     await migrationService.createWithTemplate(
       ErrorTemplate as 'typescript',
       'pesho1234',
@@ -440,7 +440,7 @@ describe('Global Xmigrate Tests', () => {
     );
   });
 
-  it('Should throw error UP when inserting to mongo collection "Could not update changelog"', async () => {
+  it.skip('Should throw error UP when inserting to mongo collection "Could not update changelog"', async () => {
     await migrationService.createWithTemplate(
       template as 'typescript',
       'pesho1234',
