@@ -4,3 +4,5 @@ migrations-log
 coverage
 .cache
 .xmigrate
+dist/main.js
+dist/main.js.map
