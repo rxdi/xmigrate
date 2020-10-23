@@ -8,6 +8,7 @@ on:
 jobs:
   publish-gpr:
     runs-on: ubuntu-latest
+    if: startsWith( github.event.head_commit.message , '[RELEASE]')
     steps:
       - uses: actions/checkout@v1
       - name: Cache node modules
@@ -42,10 +43,8 @@ jobs:
       - run: npm config set '//registry.npmjs.org/:_authToken' "${{secrets.NPM_TOKEN}}"
 
       - name: Build distribution
-        if: !startsWith(github.event.head_commit.message, '[SKIP]')
         run: npm run build
       - name: Patch version
-        if: !startsWith(github.event.head_commit.message, '[SKIP]')
         run: npm version patch
       - name: Publish version
         run: npm publish --update-readme --access public --force
