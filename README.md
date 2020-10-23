@@ -530,3 +530,4 @@ Running 600 `migrations` takes less than 15 seconds in TypeScript compiled right
 
 Check [this](https://cloudflare-ipfs.com/ipfs/QmRsE9cRLxeVrya3eZUAheMRoxrM1RKn8MQwbczpicpvxK) video inside IPFS network
 
+Link is not working at the moment...

@@ -8,7 +8,7 @@ on:
 jobs:
   publish-gpr:
     runs-on: ubuntu-latest
-    if: startsWith( github.event.head_commit.message , '[RELEASE]')
+    # if: startsWith( github.event.commits[0].message , '[RELEASE]')
     steps:
       - uses: actions/checkout@v1
       - name: Cache node modules
