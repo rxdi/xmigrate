@@ -1,6 +1,7 @@
 import { Injectable } from '@rxdi/core';
-import { Config } from '../../injection.tokens';
+
 import { DEFAULT_CONFIG } from '../../default.config';
+import { Config } from '../../injection.tokens';
 
 @Injectable()
 export class ConfigService {

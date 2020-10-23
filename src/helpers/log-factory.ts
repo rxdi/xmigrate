@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@rxdi/core';
-import { LoggerConfig } from '../injection.tokens';
-
 import { createWriteStream, WriteStream } from 'fs';
+
+import { LoggerConfig } from '../injection.tokens';
 
 export class Logger {
   successLogger: WriteStream;
@@ -10,10 +10,10 @@ export class Logger {
   successFinished: boolean;
   constructor(successPath: string, errorPath: string) {
     this.successLogger = createWriteStream(successPath, {
-      flags: 'a'
+      flags: 'a',
     });
     this.errorLogger = createWriteStream(errorPath, {
-      flags: 'a'
+      flags: 'a',
     });
     this.successLogger.on('finish', () => {
       this.successFinished = true;
@@ -25,15 +25,18 @@ export class Logger {
     });
   }
   log(res: unknown) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.successFinished) {
-        return this.successLogger.write(this.getLogTemplate(res, '🚀'), resolve);
+        return this.successLogger.write(
+          this.getLogTemplate(res, '🚀'),
+          resolve,
+        );
       }
       resolve();
     });
   }
   error(res: unknown) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (!this.errorFinished) {
         return this.errorLogger.write(this.getLogTemplate(res, '🔥'), resolve);
       }
@@ -73,17 +76,17 @@ export class LogFactory {
   getConfig(type: 'up' | 'down') {
     return {
       successPath: `${this.config.folder}/${this.config[type].success}`,
-      errorPath: `${this.config.folder}/${this.config[type].error}`
+      errorPath: `${this.config.folder}/${this.config[type].error}`,
     };
   }
 
   closeConnections() {
-    [...this.loggers.values()].forEach(logger => logger.close());
+    [...this.loggers.values()].forEach((logger) => logger.close());
   }
 
   create(
     name: string,
-    { successPath, errorPath }: { successPath: string; errorPath: string }
+    { successPath, errorPath }: { successPath: string; errorPath: string },
   ) {
     if (this.has(name)) {
       return this.get(name);

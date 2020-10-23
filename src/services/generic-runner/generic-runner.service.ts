@@ -1,10 +1,12 @@
-import { ReturnType, Tasks, MigrationSchema } from '../../injection.tokens';
-import { normalize } from 'path';
-import chalk from 'chalk';
-import { LogFactory } from '../../helpers/log-factory';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@rxdi/core';
-import { MigrationService } from '../migration/migration.service';
+import chalk from 'chalk';
+import { normalize } from 'path';
+
+import { LogFactory } from '../../helpers/log-factory';
+import { MigrationSchema, ReturnType, Tasks } from '../../injection.tokens';
 import { ConfigService } from '../config/config.service';
+import { MigrationService } from '../migration/migration.service';
 import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
 
 @Injectable()
@@ -14,7 +16,7 @@ export class GenericRunner {
     private logger: LogFactory,
     private configService: ConfigService,
     private resolver: MigrationsResolver,
-    private migrationService: MigrationService
+    private migrationService: MigrationService,
   ) {}
 
   setTasks(tasks: any[]) {
@@ -32,17 +34,17 @@ export class GenericRunner {
       if (res && res.status && res.result.length) {
         console.log(`
           \n🔥  There are ${chalk.red(
-            res.result.length
-          )} migrations with status '${chalk.red('PENDING')}', run '${chalk.green(
-          `xmigrate up`
-        )}' command!
+            res.result.length,
+          )} migrations with status '${chalk.red(
+          'PENDING',
+        )}', run '${chalk.green(`xmigrate up`)}' command!
           `);
       } else {
         console.log(`
         \n🚀  ${chalk.green.bold(
           res && res.length
             ? `Success! Ran ${res.length} migrations.`
-            : 'Already up to date'
+            : 'Already up to date',
         )}
         `);
       }
@@ -60,7 +62,7 @@ export class GenericRunner {
           console.error('\n🔥  Migration rollback exited with error  ', err);
           await this.logger.getDownLogger().error({
             errorMessage: err.message,
-            fileName: e.fileName
+            fileName: e.fileName,
           });
         }
       }
@@ -72,17 +74,17 @@ export class GenericRunner {
   private async rollback(fileName: string) {
     const response: ReturnType = {
       fileName,
-      appliedAt: new Date()
+      appliedAt: new Date(),
     } as any;
     const logger = this.logger.getDownLogger();
     const { migrationsDir } = this.configService.config;
     const migrationPath = normalize(
-      `${process.cwd()}/${migrationsDir}/${fileName}`
+      `${process.cwd()}/${migrationsDir}/${fileName}`,
     );
 
     console.log(`
 \n🙏  ${chalk.bold('Status: Executing rollback operation')} ${chalk.red(
-      'xmigrate down'
+      'xmigrate down',
     )}
 📁  ${chalk.bold('Migration:')} ${migrationPath}
       `);
@@ -94,13 +96,13 @@ export class GenericRunner {
       migration = require(migrationPath);
     }
     response.result = await migration.down(
-      await this.migrationService.connect()
+      await this.migrationService.connect(),
     );
     response.appliedAt = new Date();
     console.log(
       `\n🚀  ${chalk.green(
-        'Rollback operation success, nothing changed if written correctly!'
-      )}`
+        'Rollback operation success, nothing changed if written correctly!',
+      )}`,
     );
     await logger.log(response);
     return response;
@@ -109,7 +111,7 @@ export class GenericRunner {
   bind(self: MigrationService) {
     // Binds appropriate `this` to tasks
     Array.from(this.tasks.keys()).map((k: string) =>
-      this.tasks.set(k, this.tasks.get(k).bind(self))
+      this.tasks.set(k, this.tasks.get(k).bind(self)),
     );
     return this;
   }
@@ -119,12 +121,12 @@ export class GenericRunner {
       mongodb: { databaseName },
       migrationsDir,
       logger: { folder },
-      changelogCollectionName
+      changelogCollectionName,
     } = this.configService.config;
     console.log(`
     \n🖥️  ${chalk.bold('Database:')} ${chalk.blue.bold(databaseName)}
     \n💿  ${chalk.bold('DBCollection:')} ${chalk.blue.bold(
-      changelogCollectionName
+      changelogCollectionName,
     )}
     \n🗄️  ${chalk.bold('LoggerDir:')} ${chalk.blue.bold(folder)}
     \n📁  ${chalk.bold('MigrationsDir:')} ${chalk.blue.bold(migrationsDir)}

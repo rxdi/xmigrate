@@ -1,9 +1,10 @@
-import { nextOrDefault, includes } from './args-extractors';
-import { LogFactory } from './log-factory';
 import { createTestBed } from '@rxdi/core';
-import { Config, LoggerConfig } from '../injection.tokens';
 import { unlink } from 'fs';
 import { promisify } from 'util';
+
+import { Config, LoggerConfig } from '../injection.tokens';
+import { includes, nextOrDefault } from './args-extractors';
+import { LogFactory } from './log-factory';
 
 const config = {
   changelogCollectionName: 'migrations',
@@ -15,20 +16,20 @@ const config = {
     folder: './migrations-log',
     up: {
       success: 'up.success.log',
-      error: 'up.error.log'
+      error: 'up.error.log',
     },
     down: {
       success: 'down.success.log',
-      error: 'down.error.log'
-    }
+      error: 'down.error.log',
+    },
   },
   mongodb: {
     url: `mongodb://localhost:27017`,
     databaseName: 'test',
     options: {
-      useNewUrlParser: true
-    }
-  }
+      useNewUrlParser: true,
+    },
+  },
 };
 
 describe('Helpers', () => {
@@ -37,13 +38,13 @@ describe('Helpers', () => {
       providers: [
         {
           provide: Config,
-          useValue: config
+          useValue: config,
         },
         {
           provide: LoggerConfig,
-          useValue: config.logger
-        }
-      ]
+          useValue: config.logger,
+        },
+      ],
     });
   });
   it('Should set "es6" template when argument --template es6 present', async () => {
@@ -63,9 +64,9 @@ describe('Helpers', () => {
     process.argv.push('--template');
     process.argv.push('yes');
     expect(
-      nextOrDefault('--template', 'typescript', v =>
-        v === 'yes' ? 'Oh yeah' : 'Noo'
-      )
+      nextOrDefault('--template', 'typescript', (v) =>
+        v === 'yes' ? 'Oh yeah' : 'Noo',
+      ),
     ).toBe('Oh yeah');
     process.argv.pop();
     process.argv.pop();
@@ -75,9 +76,9 @@ describe('Helpers', () => {
     process.argv.push('--template');
     process.argv.push('no');
     expect(
-      nextOrDefault('--template' as any, 'typescript', v =>
-        v === 'yes' ? 'Oh yeah' : 'Noo'
-      )
+      nextOrDefault('--template' as never, 'typescript', (v) =>
+        v === 'yes' ? 'Oh yeah' : 'Noo',
+      ),
     ).toBe('Noo');
     process.argv.pop();
     process.argv.pop();
@@ -115,7 +116,6 @@ describe('Helpers', () => {
     process.argv.pop();
   });
 
-
   it('Next or default will be true if no value is provided', () => {
     process.argv.push('up');
     expect(nextOrDefault('up')).toBe(true);
@@ -126,15 +126,15 @@ describe('Helpers', () => {
     const logFactory = new LogFactory(config.logger);
     logFactory.create('pesho', {
       errorPath: './test.error.log',
-      successPath: './test.succes.log'
+      successPath: './test.succes.log',
     });
     logFactory.create('pesho', {
       errorPath: './test.error.log',
-      successPath: './test.succes.log'
+      successPath: './test.succes.log',
     });
     const log = logFactory.create('pesho', {
       errorPath: './test.error.log',
-      successPath: './test.succes.log'
+      successPath: './test.succes.log',
     });
     await log.error('omg');
     log.successFinished = true;

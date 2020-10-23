@@ -1,5 +1,5 @@
-import { promisify } from 'util';
 import { mkdir } from 'fs';
+import { promisify } from 'util';
 
 export async function ensureDir(dirpath: string) {
   try {

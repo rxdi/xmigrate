@@ -1,7 +1,8 @@
-import { createTestBed, Container } from '@rxdi/core';
-import { MigrationService } from './migration.service';
-import { DatabaseService } from '../database/database.service';
+import { Container, createTestBed } from '@rxdi/core';
+
 import { Config, LoggerConfig } from '../../injection.tokens';
+import { DatabaseService } from '../database/database.service';
+import { MigrationService } from './migration.service';
 
 const config = {
   changelogCollectionName: 'migrations',
@@ -13,20 +14,20 @@ const config = {
     folder: './migrations-log',
     up: {
       success: 'up.success.log',
-      error: 'up.error.log'
+      error: 'up.error.log',
     },
     down: {
       success: 'down.success.log',
-      error: 'down.error.log'
-    }
+      error: 'down.error.log',
+    },
   },
   mongodb: {
     url: `mongodb://localhost:27017`,
     databaseName: 'test',
     options: {
-      useNewUrlParser: true
-    }
-  }
+      useNewUrlParser: true,
+    },
+  },
 };
 describe('Migration Service', () => {
   let migrationService: MigrationService;
@@ -39,14 +40,14 @@ describe('Migration Service', () => {
           DatabaseService,
           {
             provide: Config,
-            useValue: config
+            useValue: config,
           },
           {
             provide: LoggerConfig,
-            useValue: config.logger
-          }
-        ]
-      })
+            useValue: config.logger,
+          },
+        ],
+      }),
   );
   beforeEach(async () => {
     migrationService = Container.get(MigrationService);
@@ -55,9 +56,10 @@ describe('Migration Service', () => {
 
   it('Should connect to mongoose and mongodb with single connect method', async () => {
     const spyMongo = spyOn(databaseService, 'connect').and.callFake(() => ({}));
-    const spyMongoose = spyOn(databaseService, 'mongooseConnect').and.callFake(
-      () => (() => ({}))
-    );
+    const spyMongoose = spyOn(
+      databaseService,
+      'mongooseConnect',
+    ).and.callFake(() => () => ({}));
     await migrationService.connect();
     expect(spyMongo).toHaveBeenCalled();
     expect(spyMongoose).toHaveBeenCalled();

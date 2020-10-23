@@ -1,17 +1,18 @@
-import { DatabaseService } from '../database/database.service';
 import { Injectable } from '@rxdi/core';
-import { ReturnType } from '../../injection.tokens';
+import chalk from 'chalk';
+import { createWriteStream, readFile, writeFile } from 'fs';
+import { normalize } from 'path';
 import { promisify } from 'util';
-import { writeFile, createWriteStream, readFile } from 'fs';
+
 import { nowAsString } from '../../helpers/date';
+import { ErrorMap } from '../../helpers/error';
+import { LogFactory } from '../../helpers/log-factory';
+import { ReturnType } from '../../injection.tokens';
 import { TemplateTypes } from '../../templates/index';
 import * as templates from '../../templates/index';
-import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
-import chalk from 'chalk';
-import { normalize } from 'path';
-import { LogFactory } from '../../helpers/log-factory';
-import { ErrorMap } from '../../helpers/error';
 import { ConfigService } from '../config/config.service';
+import { DatabaseService } from '../database/database.service';
+import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
 
 @Injectable()
 export class MigrationService {
@@ -19,7 +20,7 @@ export class MigrationService {
     private configService: ConfigService,
     private database: DatabaseService,
     private migrationsResolver: MigrationsResolver,
-    private logger: LogFactory
+    private logger: LogFactory,
   ) {}
 
   async connect() {
@@ -30,7 +31,7 @@ export class MigrationService {
   async up() {
     const statusItems = await this.statusInternal();
     const pendingItems = statusItems.filter(
-      item => item.appliedAt === 'PENDING'
+      (item) => item.appliedAt === 'PENDING',
     );
     const migrated: ReturnType[] = [];
 
@@ -38,8 +39,8 @@ export class MigrationService {
 
     const logger = this.logger.getUpLogger();
     const typescriptMigrations = pendingItems
-      .filter(item => this.migrationsResolver.isTypescript(item.fileName))
-      .map(m => m.fileName);
+      .filter((item) => this.migrationsResolver.isTypescript(item.fileName))
+      .map((m) => m.fileName);
     if (typescriptMigrations.length) {
       await this.migrationsResolver.transpileMigrations(typescriptMigrations);
     }
@@ -47,7 +48,7 @@ export class MigrationService {
       let result: unknown;
       try {
         const migration = await this.migrationsResolver.loadMigration(
-          item.fileName
+          item.fileName,
         );
         result = await migration.up(client);
       } catch (err) {
@@ -57,7 +58,7 @@ export class MigrationService {
         await logger.error({
           migrated,
           errorMessage: error.message,
-          fileName: item.fileName
+          fileName: item.fileName,
         });
         throw error;
       }
@@ -73,14 +74,14 @@ export class MigrationService {
         await logger.error({
           migrated,
           errorMessage: err.message,
-          fileName: item.fileName
+          fileName: item.fileName,
         });
         throw new Error(`Could not update changelog: ${err.message}`);
       }
       const res = {
         fileName: item.fileName,
         appliedAt,
-        result
+        result,
       };
       await logger.log(res);
       migrated.push(res);
@@ -99,14 +100,14 @@ export class MigrationService {
     const statusItems = await this.statusInternal();
 
     const appliedItems = statusItems.filter(
-      item => item.appliedAt !== 'PENDING'
+      (item) => item.appliedAt !== 'PENDING',
     );
     const lastAppliedItem = appliedItems[appliedItems.length - 1];
     if (!lastAppliedItem) {
       return;
     }
     const isTypescript = this.migrationsResolver.isTypescript(
-      lastAppliedItem.fileName
+      lastAppliedItem.fileName,
     );
     let result: unknown;
     if (appliedItems.length && lastAppliedItem) {
@@ -115,12 +116,12 @@ export class MigrationService {
 
       if (isTypescript) {
         await this.migrationsResolver.transpileMigrations([
-          lastAppliedItem.fileName
+          lastAppliedItem.fileName,
         ]);
       }
       try {
         const migration = await this.migrationsResolver.loadMigration(
-          lastAppliedItem.fileName
+          lastAppliedItem.fileName,
         );
         result = await migration.down(client);
       } catch (err) {
@@ -130,7 +131,7 @@ export class MigrationService {
         await logger.error({
           downgraded,
           errorMessage: err.message,
-          fileName: lastAppliedItem.fileName
+          fileName: lastAppliedItem.fileName,
         });
         throw error;
       }
@@ -142,7 +143,7 @@ export class MigrationService {
         const res: ReturnType = {
           fileName: lastAppliedItem.fileName,
           appliedAt: new Date(),
-          result
+          result,
         };
         await logger.log(res);
         downgraded.push(res);
@@ -150,7 +151,7 @@ export class MigrationService {
         await logger.error({
           downgraded,
           errorMessage: err.message,
-          fileName: lastAppliedItem.fileName
+          fileName: lastAppliedItem.fileName,
         });
         throw new Error(`Could not update changelog: ${err.message}`);
       }
@@ -167,8 +168,8 @@ export class MigrationService {
     name: string,
     config: { raw: boolean; typescript?: boolean } = {
       raw: false,
-      typescript: false
-    }
+      typescript: false,
+    },
   ) {
     let rawTemplate = templates[template];
 
@@ -179,27 +180,28 @@ export class MigrationService {
     }
 
     const isTypescript = config.typescript || template === 'typescript';
-
+    const dateTimeFormat = this.configService.config.dateTimeFormat;
+    const timestamp = dateTimeFormat ? dateTimeFormat() : nowAsString();
     const filePath = normalize(
-      `./${this.configService.config.migrationsDir}/${nowAsString()}-${name}.${
+      `./${this.configService.config.migrationsDir}/${timestamp}-${name}.${
         isTypescript ? 'ts' : 'js'
-      }`
+      }`,
     );
     await promisify(writeFile)(filePath, rawTemplate, {
-      encoding: 'utf-8'
+      encoding: 'utf-8',
     });
     return '/' + filePath;
   }
 
   private async writeConfig() {
     await promisify(writeFile)('./xmigrate.js', templates.migration, {
-      encoding: 'utf-8'
+      encoding: 'utf-8',
     });
   }
 
   async init() {
     const gitIgnore = await promisify(readFile)('./.gitignore', {
-      encoding: 'utf-8'
+      encoding: 'utf-8',
     });
     const stream = createWriteStream('./.gitignore', { flags: 'a' });
     if (!gitIgnore.includes('.cache')) {
@@ -215,11 +217,12 @@ export class MigrationService {
   async create({ name, template }: { name: string; template: TemplateTypes }) {
     const customTemplate =
       template || this.configService.config.defaultTemplate;
+
     const fileName = await this.createWithTemplate(customTemplate, name);
     console.log(`
 \n🚀  ${chalk.bold('Template:')} "${chalk.blue(customTemplate)}"!
 \n💾  ${chalk.bold('File:')} ${chalk.blue(
-      normalize(`${process.cwd()}//${fileName}`)
+      normalize(`${process.cwd()}//${fileName}`),
     )}
 \n🚀  ${chalk.green.bold('Migration template created!')}
 `);
@@ -231,13 +234,13 @@ export class MigrationService {
     const collection = client
       .db()
       .collection<ReturnType>(
-        this.configService.config.changelogCollectionName
+        this.configService.config.changelogCollectionName,
       );
     const changelog = await collection.find({}).toArray();
     return fileNames.map((fileName: string) => {
-      const itemInLog = changelog.find(log => log.fileName === fileName);
+      const itemInLog = changelog.find((log) => log.fileName === fileName);
       const appliedAt = itemInLog
-        ? (itemInLog.appliedAt as any).toJSON()
+        ? (itemInLog.appliedAt as Date).toJSON()
         : 'PENDING';
       return { fileName, appliedAt, result: null } as ReturnType;
     });
@@ -248,7 +251,7 @@ export class MigrationService {
     this.printStatus(statusTable, 'table');
     return {
       status: true,
-      result: statusTable.filter(i => i.appliedAt === 'PENDING')
+      result: statusTable.filter((i) => i.appliedAt === 'PENDING'),
     };
   }
 
@@ -263,7 +266,7 @@ ${chalk.blue('-'.repeat(process.stdout.columns))}
 📁  ${chalk.bold(`Filename:`)} ${chalk.green(item.fileName)}
 ⏱️  ${chalk.bold(`Applied at:`)} ${chalk.green(String(item.appliedAt))}
 ${chalk.blue('-'.repeat(process.stdout.columns))}
-    `)
+    `),
     );
   }
 }

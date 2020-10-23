@@ -1,7 +1,8 @@
-import { createTestBed, Container } from '@rxdi/core';
-import { DatabaseService } from './database.service';
+import { Container, createTestBed } from '@rxdi/core';
+
+import { FakeMongoClient, MongoClientMockUp } from '../../../tests/helpers';
 import { ConfigService } from '../config/config.service';
-import { MongoClientMockUp, FakeMongoClient } from '../../../tests/helpers';
+import { DatabaseService } from './database.service';
 
 describe('Database service', () => {
   let database: DatabaseService;
@@ -9,7 +10,7 @@ describe('Database service', () => {
 
   beforeEach(async () => {
     await createTestBed({
-      providers: [DatabaseService, ConfigService]
+      providers: [DatabaseService, ConfigService],
     });
     database = Container.get(DatabaseService);
     config = Container.get(ConfigService);
@@ -19,9 +20,9 @@ describe('Database service', () => {
         url: 'mongodb://localhost:27017',
         databaseName: 'test',
         options: {
-          useNewUrlParser: true
-        }
-      }
+          useNewUrlParser: true,
+        },
+      },
     });
   });
 
@@ -41,14 +42,14 @@ describe('Database service', () => {
     } catch (e) {
       expect(e.message).toBe(
         'No `databaseName` defined in config file! This is required since migrate-mongo v3. ' +
-          'See https://github.com/seppevs/migrate-mongo#initialize-a-new-project'
+          'See https://github.com/seppevs/migrate-mongo#initialize-a-new-project',
       );
     }
   });
 
   it('Should connect to database and return mongo client', async () => {
     const spy = spyOn(database, 'getMongoClient').and.callFake(
-      () => new MongoClientMockUp(true, 'pesho')
+      () => new MongoClientMockUp(true, 'pesho'),
     );
     const connection = await database.connect();
     expect(connection.db).toBeTruthy();
@@ -60,7 +61,7 @@ describe('Database service', () => {
 
   it('Should get mongo client', async () => {
     const spy = spyOn(database, 'getMongoClient').and.callFake(
-      () => new MongoClientMockUp(true, 'pesho')
+      () => new MongoClientMockUp(true, 'pesho'),
     );
     const connection = await database.getMongoClient();
     expect(connection).toBeInstanceOf(MongoClientMockUp);
@@ -73,7 +74,11 @@ describe('Database service', () => {
   });
 
   it('Should connect with mongoose', async () => {
-    const spy = spyOn(database, 'connectMongoose').and.callFake(() => (() => ({disconnect: () => {}})));
+    const spy = spyOn(database, 'connectMongoose').and.callFake(() => () => ({
+      disconnect: () => {
+        return;
+      },
+    }));
     const connection = await database.mongooseConnect();
     database.closeMongoose();
     expect(spy).toHaveBeenCalled();
@@ -81,7 +86,10 @@ describe('Database service', () => {
   });
 
   it('Should disconnect from mongodb', async () => {
-    const connection = await database.connections.set('dada', FakeMongoClient(true) as any);
+    const connection = await database.connections.set(
+      'dada',
+      FakeMongoClient(true) as never,
+    );
     database.close();
     expect(connection).toBeInstanceOf(Object);
   });
@@ -90,5 +98,4 @@ describe('Database service', () => {
     const connection = await database.connectMongoose();
     expect(connection).toBeInstanceOf(Function);
   });
-
 });

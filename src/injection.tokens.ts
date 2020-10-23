@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { InjectionToken } from '@rxdi/core';
 import { MongoClient } from 'mongodb';
+
 import { TemplateTypes } from './templates';
 
 export interface ReturnType {
@@ -35,6 +37,7 @@ export interface Config {
       useNewUrlParser: boolean;
     };
   };
+  dateTimeFormat?: () => string;
   outDir: string;
   migrationsDir?: string;
   changelogCollectionName?: string;
@@ -43,7 +46,12 @@ export interface Config {
   typescript?: boolean;
 }
 
-export type Tasks = 'up' | 'down' | 'status' | 'create' | '--template' | '--rollback';
-
+export type Tasks =
+  | 'up'
+  | 'down'
+  | 'status'
+  | 'create'
+  | '--template'
+  | '--rollback';
 
 export const CommandInjector = new InjectionToken('CommandInjector');

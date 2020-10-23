@@ -1,5 +1,5 @@
+# @rxdi/xmigrate
 
-# @rxdi/xmigrate 
 [![Build Status](https://travis-ci.org/rxdi/xmigrate.svg?branch=master)](https://travis-ci.org/rxdi/xmigrate)
 [![Coverage Status](https://coveralls.io/repos/github/rxdi/xmigrate/badge.svg?branch=master)](https://coveralls.io/github/rxdi/xmigrate?branch=master)
 
@@ -7,16 +7,16 @@ Migration library for `Mongodb` and `Mongoose` written in `TypeScript`
 
 ## Features
 
-* Simple UI/UX
-* Rollback support
-* Templates for migrations
-* TypeScript/JavaScript compatible
-* `async`/`await` configuration loader
-* Mongoose and Mongodb compatibility
-* ACID transactions provided by MongoDB
-* `error` and `success` logs for `up`/`down` migrations 
-* Infinite rrror log with `append` NodeJS streaming technique
-* 100% TypeScript support with JIT compilation provided by [@gapi/cli](https://github.com/Stradivario/gapi-cli) and [ParcelJS](https://parceljs.org)
+- Simple UI/UX
+- Rollback support
+- Templates for migrations
+- TypeScript/JavaScript compatible
+- `async`/`await` configuration loader
+- Mongoose and Mongodb compatibility
+- ACID transactions provided by MongoDB
+- `error` and `success` logs for `up`/`down` migrations
+- Infinite rrror log with `append` NodeJS streaming technique
+- 100% TypeScript support with JIT compilation provided by [@gapi/cli](https://github.com/Stradivario/gapi-cli) and [ParcelJS](https://parceljs.org)
 
 ## Installation
 
@@ -62,23 +62,25 @@ export default async () => {
     defaultTemplate: 'es6',
     typescript: true,
     outDir: './.xmigrate',
+    /* Custom datetime formatting can be applied like so */
+    // dateTimeFormat: () => new Date().toISOString(),
     logger: {
       folder: './migrations-log',
       up: {
         success: 'up.success.log',
-        error: 'up.error.log'
+        error: 'up.error.log',
       },
       down: {
         success: 'down.success.log',
-        error: 'down.error.log'
-      }
+        error: 'down.error.log',
+      },
     },
     mongodb: {
       url: `mongodb://localhost:27017`,
       databaseName: 'test',
       options: {
-        useNewUrlParser: true
-      }
+        useNewUrlParser: true,
+      },
     },
   };
 };
@@ -143,13 +145,13 @@ When there is a `PENDING` flag these migrations were not running against the cur
 
 ```bash
 🖥️  Database: test
-    
+
 💿  DBCollection: migrations
-    
+
 🗄️  LoggerDir: ./migrations-log
-    
+
 📁  MigrationsDir: migrations
-    
+
 👷  Script: xmigrate status
 
 ┌─────────┬───────────────────────────┬────────────────────────────┐
@@ -170,42 +172,40 @@ Native mongo driver template
 
 ```typescript
 module.exports = {
-  async up (client) {
+  async up(client) {
     await client
       .db()
       .collection('albums')
-      .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: true } })
+      .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: true } });
     await client
       .collection('albums')
-      .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } })
+      .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
   },
 
-  async down (client) {
+  async down(client) {
     await client
       .db()
       .collection('albums')
-      .updateOne({ artist: 'The Doors' }, { $set: { stars: 0 } })
+      .updateOne({ artist: 'The Doors' }, { $set: { stars: 0 } });
     await client
       .collection('albums')
-      .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: false } })
-  }
-}
+      .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: false } });
+  },
+};
 ```
-
 
 `ES5` template
 
 ```typescript
-
 module.exports = {
-  async up (client) {
-    return ['UP']
+  async up(client) {
+    return ['UP'];
   },
 
-  async down (client) {
-    return ['DOWN']
-  }
-}
+  async down(client) {
+    return ['DOWN'];
+  },
+};
 ```
 
 `ES6` template
@@ -228,25 +228,28 @@ npm install @types/mongodb @types/mongoose -D
 ```
 
 ```typescript
-
 import { MongoClient } from 'mongodb';
 
 export async function up(client: MongoClient) {
-  await client.db()
+  await client
+    .db()
     .collection('albums')
     .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: true } });
 
-  await client.db()
+  await client
+    .db()
     .collection('albums')
     .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
 }
 
 export async function down(client: MongoClient) {
-  await client.db()
+  await client
+    .db()
     .collection('albums')
     .updateOne({ artist: 'The Doors' }, { $set: { stars: 0 } });
 
-  await client.db()
+  await client
+    .db()
     .collection('albums')
     .updateOne({ artist: 'The Beatles' }, { $set: { blacklisted: false } });
 }
@@ -263,9 +266,11 @@ npm i -g @gapi/cli
 ```
 
 Command that will be run internally
+
 ```bash
 npx gapi build --glob ./1-migration.ts,./2-migration.ts
 ```
+
 After success transpiled migration will be started from `./.xmigrate/1-migration.js`
 Before exit script will remove `artifacts` left from transpilation located inside `./.xmigrate` folder
 
@@ -276,28 +281,27 @@ The log will look something like this:
 
 ```
 🖥️  Database: test
-    
+
 💿  DBCollection: migrations
-    
+
 🗄️  LoggerDir: ./migrations-log
-    
+
 📁  MigrationsDir: migrations
-    
+
 👷  Script: xmigrate up
-    
-      
+
+
 🔥  Status: Operation executed with error
 🧨  Error: {"fileName":"20190725160011-pesho.js","migrated":[]}
 📨  Message: AAA
-      
+
 
 🙏  Status: Executing rollback operation xmigrate down
 📁  Migration: /migrations/20190725160011-pesho.js
-        
+
 
 🚀  Rollback operation success, nothing changed if written correctly!
 ```
-
 
 ## Logs
 
@@ -306,7 +310,7 @@ By default logs will append streaming content for every interaction made by migr
 Down migration success Log
 
 ```json
-🚀 ********* Thu Jul 25 2019 11:23:06 GMT+0300 (Eastern European Summer Time) ********* 
+🚀 ********* Thu Jul 25 2019 11:23:06 GMT+0300 (Eastern European Summer Time) *********
 
 {
   "fileName": "20190723165157-example.js",
@@ -319,10 +323,10 @@ Down migration success Log
 }
 ```
 
-
 Down migration error log
+
 ```json
-🔥 ********* Thu Jul 25 2019 03:28:48 GMT+0300 (Eastern European Summer Time) ********* 
+🔥 ********* Thu Jul 25 2019 03:28:48 GMT+0300 (Eastern European Summer Time) *********
 
 {
   "downgraded": [],
@@ -331,11 +335,10 @@ Down migration error log
 }
 ```
 
-
 Up migration success log
 
 ```json
-🚀 ********* Thu Jul 25 2019 11:23:24 GMT+0300 (Eastern European Summer Time) ********* 
+🚀 ********* Thu Jul 25 2019 11:23:24 GMT+0300 (Eastern European Summer Time) *********
 
 {
   "fileName": "20190723165157-example.js",
@@ -351,7 +354,7 @@ Up migration success log
 Up migration error log
 
 ```json
-🔥 ********* Thu Jul 25 2019 03:39:00 GMT+0300 (Eastern European Summer Time) ********* 
+🔥 ********* Thu Jul 25 2019 03:39:00 GMT+0300 (Eastern European Summer Time) *********
 
 {
   "migrated": [],
@@ -359,7 +362,6 @@ Up migration error log
   "fileName": "20190724235545-pesho.js"
 }
 ```
-
 
 # TypeScript configuration
 
@@ -385,23 +387,22 @@ export default async (): Promise<Config> => {
       folder: './migrations-log',
       up: {
         success: 'up.success.log',
-        error: 'up.error.log'
+        error: 'up.error.log',
       },
       down: {
         success: 'down.success.log',
-        error: 'down.error.log'
-      }
+        error: 'down.error.log',
+      },
     },
     mongodb: {
       url: `mongodb://localhost:27017`,
       databaseName: 'test',
       options: {
-        useNewUrlParser: true
-      }
+        useNewUrlParser: true,
+      },
     },
   };
 };
-
 ```
 
 Everytime `xmigrate.ts` is loaded `timestamp` is checked whether or not this file is changed
@@ -411,8 +412,6 @@ This information is saved inside `.xmigrate/config.temp` like a regular `Date` o
 This will ensure that we don't need to transpile configuration if it is not changed inside `xmigrate.ts` file
 
 Basically this is caching to improve performance and user experience with TypeScript configuration
-
-
 
 # API Usage
 
@@ -425,7 +424,7 @@ import {
   LogFactory,
   ConfigService,
   LoggerConfig,
-  Config
+  Config,
 } from '@rxdi/xmigrate';
 
 const config = {
@@ -438,20 +437,20 @@ const config = {
     folder: './migrations-log',
     up: {
       success: 'up.success.log',
-      error: 'up.error.log'
+      error: 'up.error.log',
     },
     down: {
       success: 'down.success.log',
-      error: 'down.error.log'
-    }
+      error: 'down.error.log',
+    },
   },
   mongodb: {
     url: 'mongodb://localhost:27017',
     databaseName: 'test',
     options: {
-      useNewUrlParser: true
-    }
-  }
+      useNewUrlParser: true,
+    },
+  },
 };
 
 setup({
@@ -461,13 +460,13 @@ setup({
     ConfigService,
     {
       provide: Config,
-      useValue: config
+      useValue: config,
     },
     {
       provide: LoggerConfig,
-      useValue: config.logger
-    }
-  ]
+      useValue: config.logger,
+    },
+  ],
 }).subscribe(async () => {
   const template = `
 import { MongoClient } from 'mongodb';
@@ -486,7 +485,7 @@ export async function down(client: MongoClient) {
   const filePath = await migrationService.createWithTemplate(
     template as 'typescript',
     'pesho1234',
-    { raw: true, typescript: true }
+    { raw: true, typescript: true },
   );
   console.log(filePath);
 
@@ -517,9 +516,9 @@ export default async () => {
       url: 'mongodb://localhost:27017',
       databaseName: 'test',
       options: {
-        useNewUrlParser: true
-      }
-    }
+        useNewUrlParser: true,
+      },
+    },
   };
 };
 ```

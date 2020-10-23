@@ -6,7 +6,8 @@ export const formatDate = (date: Date) => {
   const hours = '' + d.getUTCHours();
   const minutes = '' + d.getUTCMinutes();
   const seconds = '' + d.getUTCSeconds();
-  const convertedSeconds = Number(seconds) < 10 ? [0, seconds].join('') : seconds;
+  const convertedSeconds =
+    Number(seconds) < 10 ? [0, seconds].join('') : seconds;
   if (month.length < 2) {
     month = '0' + month;
   }
