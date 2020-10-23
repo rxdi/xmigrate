@@ -8,3 +8,4 @@ dist/*
 !dist/xmigrate-linux
 dist/main.js
 dist/main.js.map
+lib
