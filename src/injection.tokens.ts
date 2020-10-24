@@ -37,6 +37,12 @@ export interface Config {
       useNewUrlParser: boolean;
     };
   };
+  hooks?: {
+    connection: <T = any>() => Promise<T>;
+    down: (fileName: string) => Promise<any>;
+    up: (fileName: string) => Promise<any>;
+    status: (fileNames: string[]) => Promise<ReturnType[]>;
+  };
   dateTimeFormat?: () => string;
   outDir: string;
   migrationsDir?: string;

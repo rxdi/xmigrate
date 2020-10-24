@@ -24,6 +24,9 @@ export class MigrationService {
   ) {}
 
   async connect() {
+    if (this.configService.config.hooks) {
+      return this.configService.config.hooks.connection() as never;
+    }
     await this.database.mongooseConnect();
     return this.database.connect();
   }
@@ -62,14 +65,22 @@ export class MigrationService {
         });
         throw error;
       }
-      const collection = client
-        .db()
-        .collection(this.configService.config.changelogCollectionName);
+
       const { fileName } = item;
       const appliedAt = new Date();
 
       try {
-        await collection.insertOne({ fileName, appliedAt });
+        if (
+          this.configService.config.hooks &&
+          typeof this.configService.config.hooks.up === 'function'
+        ) {
+          await this.configService.config.hooks.up(fileName);
+        } else {
+          const collection = client
+            .db()
+            .collection(this.configService.config.changelogCollectionName);
+          await collection.insertOne({ fileName, appliedAt });
+        }
       } catch (err) {
         await logger.error({
           migrated,
@@ -135,11 +146,20 @@ export class MigrationService {
         });
         throw error;
       }
-      const collection = client
-        .db()
-        .collection(this.configService.config.changelogCollectionName);
+
       try {
-        await collection.deleteOne({ fileName: lastAppliedItem.fileName });
+        if (
+          this.configService.config.hooks &&
+          typeof this.configService.config.hooks.down === 'function'
+        ) {
+          await this.configService.config.hooks.down(lastAppliedItem.fileName);
+        } else {
+          const collection = client
+            .db()
+            .collection(this.configService.config.changelogCollectionName);
+          await collection.deleteOne({ fileName: lastAppliedItem.fileName });
+        }
+
         const res: ReturnType = {
           fileName: lastAppliedItem.fileName,
           appliedAt: new Date(),
@@ -230,6 +250,12 @@ export class MigrationService {
 
   async statusInternal() {
     const fileNames = await this.migrationsResolver.getFileNames();
+    if (
+      this.configService.config.hooks &&
+      typeof this.configService.config.hooks.status === 'function'
+    ) {
+      return this.configService.config.hooks.status(fileNames);
+    }
     const client = await this.connect();
     const collection = client
       .db()
