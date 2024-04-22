@@ -7,12 +7,8 @@ import { DEFAULT_CONFIG } from './default.config';
 import { ensureDir } from './helpers';
 import { includes, nextOrDefault } from './helpers/args-extractors';
 import { LogFactory } from './helpers/log-factory';
+import { TranspileTypescript } from './helpers/typescript-builder';
 import {
-  TranspileTypescript,
-  TranspileTypescriptESBuild,
-} from './helpers/typescript-builder';
-import {
-  BuilderType,
   CommandInjector,
   Config,
   LoggerConfig,
@@ -86,17 +82,10 @@ export class MigrationsModule {
                   './.xmigrate/config.temp',
                 );
                 const TranspileAndWriteTemp = async (stats: Stats) => {
-                  if (config.builder === BuilderType.GAPI) {
-                    await TranspileTypescript(
-                      [`/${configFilename}.ts`],
-                      config.outDir,
-                    );
-                  } else {
-                    await TranspileTypescriptESBuild(
-                      [`./${configFilename}.ts`],
-                      config.outDir,
-                    );
-                  }
+                  await TranspileTypescript(
+                    [`./${configFilename}.ts`],
+                    config.outDir,
+                  );
 
                   console.log('Transpile complete!');
                   await promisify(writeFile)(

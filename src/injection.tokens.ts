@@ -30,9 +30,8 @@ export interface LoggerConfig {
   };
 }
 
-export enum BuilderType {
-  ESBUILD = 'ESBUILD',
-  GAPI = 'GAPI',
+export interface BundlerConfig {
+  build(entryPoints: string[], outdir: string): Promise<void>;
 }
 
 export interface Config {
@@ -50,7 +49,7 @@ export interface Config {
   logger?: LoggerConfig;
   defaultTemplate?: TemplateTypes;
   typescript?: boolean;
-  builder?: BuilderType;
+  bundler?: BundlerConfig;
 }
 
 export type Tasks =

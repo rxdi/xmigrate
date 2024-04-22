@@ -8,7 +8,7 @@ import { promisify } from 'util';
 
 import { DEFAULT_CONFIG } from '../src/default.config';
 import { ensureDir, LogFactory } from '../src/helpers';
-import { BuilderType, Config, LoggerConfig } from '../src/injection.tokens';
+import { Config, LoggerConfig } from '../src/injection.tokens';
 import { ConfigService } from '../src/services/config/config.service';
 import { DatabaseService } from '../src/services/database/database.service';
 import { GenericRunner } from '../src/services/generic-runner/generic-runner.service';
@@ -86,9 +86,7 @@ describe('Global Xmigrate Tests', () => {
     );
     const fileNames = await migrationResolver.getFileNames();
     expect(fileNames.length).toBe(1);
-    await migrationResolver.transpileMigrations(fileNames, {
-      builder: BuilderType.GAPI,
-    });
+    await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
       FakeMongoClient(response),
@@ -383,9 +381,7 @@ describe('Global Xmigrate Tests', () => {
     );
     const fileNames = await migrationResolver.getFileNames();
     expect(fileNames.length).toBe(1);
-    await migrationResolver.transpileMigrations(fileNames, {
-      builder: BuilderType.GAPI,
-    });
+    await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
       FakeMongoClient(true),
@@ -414,9 +410,7 @@ describe('Global Xmigrate Tests', () => {
     );
     const fileNames = await migrationResolver.getFileNames();
     expect(fileNames.length).toBe(1);
-    await migrationResolver.transpileMigrations(fileNames, {
-      builder: BuilderType.GAPI,
-    });
+    await migrationResolver.transpileMigrations(fileNames);
     const migration = await migrationResolver.loadMigration(fileNames[0]);
     const spy = spyOn(databaseService, 'connect').and.callFake(() =>
       FakeMongoClient(true),
