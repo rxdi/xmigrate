@@ -24,6 +24,7 @@
     "@rxdi/core": "^0.7.37",
     "chalk": "2.4.2",
     "esbuild": "^0.20.2",
+    "esbuild-plugin-tsc": "^0.4.0",
     "esm": "3.2.25",
     "mongodb": "3.3.3",
     "mongoose": "5.7.6"

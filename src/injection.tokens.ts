@@ -15,6 +15,7 @@ export const Config = new InjectionToken('migrations-config');
 export type MigrationSchema = {
   down: (db: MongoClient) => unknown;
   up: (db: MongoClient) => unknown;
+  prepare: (db: MongoClient) => unknown;
 };
 
 export interface LoggerConfig {

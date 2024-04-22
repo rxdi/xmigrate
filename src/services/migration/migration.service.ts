@@ -52,6 +52,7 @@ export class MigrationService {
         const migration = await this.migrationsResolver.loadMigration(
           item.fileName,
         );
+        await migration.prepare(client);
         result = await migration.up(client);
       } catch (err) {
         const error = new ErrorMap(err.message);
@@ -87,7 +88,7 @@ export class MigrationService {
       };
       await logger.log(res);
       migrated.push(res);
-      return await true;
+      return true;
     };
     for (const item of pendingItems) {
       await migrateItem(item);
@@ -126,6 +127,7 @@ export class MigrationService {
         const migration = await this.migrationsResolver.loadMigration(
           lastAppliedItem.fileName,
         );
+        await migration.prepare(client);
         result = await migration.down(client);
       } catch (err) {
         const error = new ErrorMap(err.message);

@@ -26,6 +26,7 @@ export const TranspileTypescriptESBuild = async (
   outdir: string,
 ) => {
   try {
+    const tscPlugin = await import('esbuild-plugin-tsc');
     return (await import('esbuild')).build({
       entryPoints,
       bundle: true,
@@ -35,6 +36,7 @@ export const TranspileTypescriptESBuild = async (
       format: 'cjs',
       outdir,
       logLevel: 'info',
+      plugins: [tscPlugin.default()],
     });
   } catch (e) {
     console.error(e);

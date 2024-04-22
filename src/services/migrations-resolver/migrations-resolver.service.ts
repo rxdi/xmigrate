@@ -42,6 +42,7 @@ export class MigrationsResolver {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       migration = require('esm')(module)(this.getFilePath(fileName));
     }
+    migration.prepare = migration.prepare || (() => Promise.resolve());
     return migration;
   }
 
@@ -74,7 +75,7 @@ export class MigrationsResolver {
   }
 
   async loadTsCompiledMigration(fileName: string) {
-    return require(this.getTsCompiledFilePath(fileName));
+    return import(this.getTsCompiledFilePath(fileName));
   }
 
   async transpileMigrations(
