@@ -25,7 +25,7 @@ export class Logger {
     });
   }
   log(res: unknown) {
-    return new Promise((resolve) => {
+    return new Promise<void | Error>((resolve) => {
       if (!this.successFinished) {
         return this.successLogger.write(
           this.getLogTemplate(res, '🚀'),
@@ -36,7 +36,7 @@ export class Logger {
     });
   }
   error(res: unknown) {
-    return new Promise((resolve) => {
+    return new Promise<void | Error>((resolve) => {
       if (!this.errorFinished) {
         return this.errorLogger.write(this.getLogTemplate(res, '🔥'), resolve);
       }
