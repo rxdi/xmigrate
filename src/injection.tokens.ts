@@ -29,6 +29,11 @@ export interface LoggerConfig {
   };
 }
 
+export enum BuilderType {
+  ESBUILD = 'ESBUILD',
+  GAPI = 'GAPI',
+}
+
 export interface Config {
   mongodb: {
     url: string;
@@ -44,6 +49,7 @@ export interface Config {
   logger?: LoggerConfig;
   defaultTemplate?: TemplateTypes;
   typescript?: boolean;
+  builder?: BuilderType;
 }
 
 export type Tasks =

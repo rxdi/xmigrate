@@ -7,7 +7,7 @@ import { promisify } from 'util';
 import { nowAsString } from '../../helpers/date';
 import { ErrorMap } from '../../helpers/error';
 import { LogFactory } from '../../helpers/log-factory';
-import { ReturnType } from '../../injection.tokens';
+import { BuilderType, ReturnType } from '../../injection.tokens';
 import { TemplateTypes } from '../../templates/index';
 import * as templates from '../../templates/index';
 import { ConfigService } from '../config/config.service';
@@ -42,7 +42,9 @@ export class MigrationService {
       .filter((item) => this.migrationsResolver.isTypescript(item.fileName))
       .map((m) => m.fileName);
     if (typescriptMigrations.length) {
-      await this.migrationsResolver.transpileMigrations(typescriptMigrations);
+      await this.migrationsResolver.transpileMigrations(typescriptMigrations, {
+        builder: BuilderType[this.configService.config.builder],
+      });
     }
     const migrateItem = async (item: ReturnType) => {
       let result: unknown;
@@ -115,9 +117,10 @@ export class MigrationService {
       const client = await this.connect();
 
       if (isTypescript) {
-        await this.migrationsResolver.transpileMigrations([
-          lastAppliedItem.fileName,
-        ]);
+        await this.migrationsResolver.transpileMigrations(
+          [lastAppliedItem.fileName],
+          { builder: BuilderType.ESBUILD },
+        );
       }
       try {
         const migration = await this.migrationsResolver.loadMigration(

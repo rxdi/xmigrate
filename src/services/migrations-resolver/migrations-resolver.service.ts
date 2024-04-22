@@ -3,8 +3,11 @@ import { readdir, unlink } from 'fs';
 import { extname, join } from 'path';
 import { promisify } from 'util';
 
-import { TranspileTypescript } from '../../helpers/typescript-builder';
-import { MigrationSchema } from '../../injection.tokens';
+import {
+  TranspileTypescript,
+  TranspileTypescriptESBuild,
+} from '../../helpers/typescript-builder';
+import { BuilderType, MigrationSchema } from '../../injection.tokens';
 import { ConfigService } from '../config/config.service';
 
 @Injectable()
@@ -74,11 +77,21 @@ export class MigrationsResolver {
     return require(this.getTsCompiledFilePath(fileName));
   }
 
-  async transpileMigrations(migrations: string[]) {
-    await TranspileTypescript(
-      migrations.map((fileName) => this.getRelativePath(fileName)),
-      this.configService.config.outDir,
-    );
+  async transpileMigrations(
+    migrations: string[],
+    { builder = BuilderType.ESBUILD }: { builder: BuilderType },
+  ) {
+    if (builder === BuilderType.GAPI) {
+      await TranspileTypescript(
+        migrations.map((fileName) => this.getRelativePath(fileName)),
+        this.configService.config.outDir,
+      );
+    } else {
+      await TranspileTypescriptESBuild(
+        migrations.map((fileName) => this.getFilePath(fileName)),
+        this.configService.config.outDir,
+      );
+    }
   }
 
   getTsCompiledFilePath(fileName: string) {

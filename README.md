@@ -16,7 +16,7 @@ Migration library for `Mongodb` and `Mongoose` written in `TypeScript`
 - ACID transactions provided by MongoDB
 - `error` and `success` logs for `up`/`down` migrations
 - Infinite rrror log with `append` NodeJS streaming technique
-- 100% TypeScript support with JIT compilation provided by [@gapi/cli](https://github.com/Stradivario/gapi-cli) and [ParcelJS](https://parceljs.org)
+- 100% TypeScript support with JIT compilation provided by [esbuild](https://esbuild.github.io/)
 
 ## Installation
 
@@ -61,6 +61,7 @@ export default async () => {
     migrationsDir: './migrations',
     defaultTemplate: 'es6',
     typescript: true,
+    builder: 'ESBUILD',
     outDir: './.xmigrate',
     /* Custom datetime formatting can be applied like so */
     // dateTimeFormat: () => new Date().toISOString(),
@@ -255,7 +256,7 @@ export async function down(client: MongoClient) {
 }
 ```
 
-## TypeScript migrations
+## TypeScript migrations (Deprecated use option `builder: 'ESBUILD' in your xmigrate config file`)
 
 To be able to run migrations with TypeScript you need to set `typescript: true` inside `xmigrate.js` and install `@gapi/cli` globally
 
@@ -366,12 +367,6 @@ Up migration error log
 # TypeScript configuration
 
 When you change your configuration file to `xmigrate.ts` it will automatically transpile to `ES5` and will be loaded
-
-This type of configuration requires `@gapi/cli` to be installed since we will transpile configuration with it!
-
-```bash
-npm i -g @gapi/cli
-```
 
 ```typescript
 import { Config } from '@rxdi/xmigrate';
