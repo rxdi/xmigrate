@@ -1,7 +1,11 @@
 export default `
 import { MongoClient } from 'mongodb';
 
-export async function up(client: MongoClient) {
+export async function prepare(client: MongoClient) {
+  return [client]
+}
+
+export async function up([client]: [MongoClient]) {
   await client
     .db()
     .collection('albums')
@@ -12,7 +16,8 @@ export async function up(client: MongoClient) {
     .collection('albums')
     .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
 }
-export async function down(client: MongoClient) {
+
+export async function down([client]: [MongoClient]) {
   await client
     .db()
     .collection('albums')

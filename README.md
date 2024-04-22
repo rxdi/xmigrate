@@ -15,7 +15,7 @@ Migration library for `Mongodb` and `Mongoose` written in `TypeScript`
 - Mongoose and Mongodb compatibility
 - ACID transactions provided by MongoDB
 - `error` and `success` logs for `up`/`down` migrations
-- Infinite rrror log with `append` NodeJS streaming technique
+- Infinite error log with `append` NodeJS streaming technique
 - 100% TypeScript support with JIT compilation provided by [esbuild](https://esbuild.github.io/)
 
 ## Installation
@@ -33,7 +33,7 @@ chmod +x xmigrate-linux
 ```
 
 ```bash
-./xmigrate up|down|create|etc
+./xmigrate up|down|create
 ```
 
 Using `NodeJS`
@@ -61,10 +61,24 @@ export default async () => {
     migrationsDir: './migrations',
     defaultTemplate: 'es6',
     typescript: true,
-    builder: 'ESBUILD',
     outDir: './.xmigrate',
     /* Custom datetime formatting can be applied like so */
     // dateTimeFormat: () => new Date().toISOString(),
+    // bundler: {
+    //   build(entryPoints: string[], outdir: string) {
+    //     return esbuild.build({
+    //       entryPoints,
+    //       bundle: true,
+    //       sourcemap: false,
+    //       minify: false,
+    //       platform: 'node',
+    //       format: 'cjs',
+    //       outdir,
+    //       logLevel: 'info',
+    //       plugins: [pluginTsc()],
+    //     })
+    //   },
+    // },
     logger: {
       folder: './migrations-log',
       up: {
@@ -173,7 +187,12 @@ Native mongo driver template
 
 ```typescript
 module.exports = {
-  async up(client) {
+
+  async prepare(client) {
+    return [client]
+  }
+
+  async up([client]) {
     await client
       .db()
       .collection('albums')
@@ -183,7 +202,7 @@ module.exports = {
       .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
   },
 
-  async down(client) {
+  async down([client]) {
     await client
       .db()
       .collection('albums')
@@ -199,11 +218,16 @@ module.exports = {
 
 ```typescript
 module.exports = {
-  async up(client) {
+
+  async prepare(client) {
+    return [client]
+  }
+
+  async up([client]) {
     return ['UP'];
   },
 
-  async down(client) {
+  async down([client]) {
     return ['DOWN'];
   },
 };
@@ -212,10 +236,13 @@ module.exports = {
 `ES6` template
 
 ```typescript
-export async function up(client) {
+export async function prepare(client) {
+  return [client];
+}
+export async function up([client]) {
   return ['Up'];
 }
-export async function down(client) {
+export async function down([client]) {
   return ['Down'];
 }
 ```
@@ -231,7 +258,11 @@ npm install @types/mongodb @types/mongoose -D
 ```typescript
 import { MongoClient } from 'mongodb';
 
-export async function up(client: MongoClient) {
+export async function prepare(client: mongoClient) {
+  return [client];
+}
+
+export async function up([client]: [MongoClient]) {
   await client
     .db()
     .collection('albums')
@@ -243,7 +274,7 @@ export async function up(client: MongoClient) {
     .updateOne({ artist: 'The Doors' }, { $set: { stars: 5 } });
 }
 
-export async function down(client: MongoClient) {
+export async function down([client]: [MongoClient]) {
   await client
     .db()
     .collection('albums')
@@ -378,6 +409,21 @@ export default async (): Promise<Config> => {
     defaultTemplate: 'typescript',
     typescript: true,
     outDir: './.xmigrate',
+    // bundler: {
+    //   build(entryPoints: string[], outdir: string) {
+    //     return esbuild.build({
+    //       entryPoints,
+    //       bundle: true,
+    //       sourcemap: false,
+    //       minify: false,
+    //       platform: 'node',
+    //       format: 'cjs',
+    //       outdir,
+    //       logLevel: 'info',
+    //       plugins: [pluginTsc()],
+    //     });
+    //   },
+    // },
     logger: {
       folder: './migrations-log',
       up: {
@@ -466,10 +512,15 @@ setup({
   const template = `
 import { MongoClient } from 'mongodb';
 
-export async function up(client: MongoClient) {
+export async function prepare(client: MongoClient) {
+  return [client]
+}
+
+export async function up([client]: [MongoClient]) {
   return true
 }
-export async function down(client: MongoClient) {
+
+export async function down([client]: [MongoClient]) {
   return true
 }
 `;
@@ -498,30 +549,3 @@ export async function down(client: MongoClient) {
   process.exit(0);
 }, console.error.bind(console));
 ```
-
-### Minimal configuration
-
-```typescript
-export default async () => {
-  return {
-    defaultTemplate: 'typescript',
-    outDir: './.xmigrate',
-    typescript: true,
-    mongodb: {
-      url: 'mongodb://localhost:27017',
-      databaseName: 'test',
-      options: {
-        useNewUrlParser: true,
-      },
-    },
-  };
-};
-```
-
-### Performance tests
-
-Running 600 `migrations` takes less than 15 seconds in TypeScript compiled right down to Javascript ES5.
-
-Check [this](https://cloudflare-ipfs.com/ipfs/QmRsE9cRLxeVrya3eZUAheMRoxrM1RKn8MQwbczpicpvxK) video inside IPFS network
-
-Link is not working at the moment...

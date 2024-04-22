@@ -5,6 +5,21 @@ export default `module.exports = async () => {
     defaultTemplate: 'es6',
     outDir: './.xmigrate',
     typescript: true,
+    // bundler: {
+    //   build(entryPoints: string[], outdir: string) {
+    //     return esbuild.build({
+    //       entryPoints,
+    //       bundle: true,
+    //       sourcemap: false,
+    //       minify: false,
+    //       platform: 'node',
+    //       format: 'cjs',
+    //       outdir,
+    //       logLevel: 'info',
+    //       plugins: [pluginTsc()],
+    //     })
+    //   },
+    // },
     logger: {
       folder: './migrations-log',
       up: {

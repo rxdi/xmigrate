@@ -41,7 +41,7 @@ export class MigrationsResolver {
     }
     return {
       ...migration,
-      prepare: migration.prepare || (() => Promise.resolve()),
+      prepare: migration.prepare || ((db) => Promise.resolve([db])),
     };
   }
 

@@ -50,8 +50,8 @@ export class MigrationService {
         const migration = await this.migrationsResolver.loadMigration(
           item.fileName,
         );
-        await migration.prepare(client);
-        result = await migration.up(client);
+        const prepare = await migration.prepare(client);
+        result = await migration.up(prepare);
       } catch (err) {
         const error = new ErrorMap(err.message);
         error.fileName = item.fileName;
@@ -124,8 +124,8 @@ export class MigrationService {
         const migration = await this.migrationsResolver.loadMigration(
           lastAppliedItem.fileName,
         );
-        await migration.prepare(client);
-        result = await migration.down(client);
+        const prepare = await migration.prepare(client);
+        result = await migration.down(prepare);
       } catch (err) {
         const error = new ErrorMap(err.message);
         error.fileName = lastAppliedItem.fileName;
