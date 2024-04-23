@@ -31,12 +31,15 @@ export default `module.exports = async () => {
         error: 'down.error.log'
       }
     },
-    mongodb: {
-      url: 'mongodb://localhost:27017',
-      databaseName: 'test',
-      options: {
-        useNewUrlParser: true
-      }
+    database: {
+      async connect() {
+        const url =
+          process.env.MONGODB_CONNECTION_STRING ?? 'mongodb://localhost:27017'
+
+        await connect(url)
+        const client = await MongoClient.connect(url)
+        return client
+      },
     },
   };
 };

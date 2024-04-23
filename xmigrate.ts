@@ -1,5 +1,6 @@
 import esbuild from 'esbuild';
-import pluginTsc from 'esbuild-plugin-tsc';
+import { MongoClient } from 'mongodb';
+import { connect } from 'mongoose';
 
 export default async () => {
   return {
@@ -18,16 +19,21 @@ export default async () => {
           format: 'cjs',
           outdir,
           logLevel: 'info',
-          plugins: [pluginTsc()],
         });
       },
     },
     // dateTimeFormat: () => new Date().toISOString(),
-    mongodb: {
-      url: 'mongodb://localhost:27017',
-      databaseName: 'test',
-      options: {
-        useNewUrlParser: true,
+    database: {
+      async connect() {
+        const url = 'mongodb://localhost:27017';
+
+        await connect(url, {
+          useNewUrlParser: true,
+        });
+        const client = await MongoClient.connect(url, {
+          useNewUrlParser: true,
+        });
+        return client;
       },
     },
   };

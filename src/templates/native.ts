@@ -1,7 +1,9 @@
 export default `
+
 export async function prepare(client) {
   return [client]
 }
+
 export async function up ([client]) {
   await client
     .db()

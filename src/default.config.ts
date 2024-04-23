@@ -21,11 +21,5 @@ export const DEFAULT_CONFIG: Config = {
       error: 'down.error.log',
     },
   },
-  mongodb: {
-    url: 'mongodb://localhost:27017',
-    databaseName: 'test',
-    options: {
-      useNewUrlParser: true,
-    },
-  },
+  database: {},
 };

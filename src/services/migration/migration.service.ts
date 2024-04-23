@@ -11,21 +11,18 @@ import { ReturnType } from '../../injection.tokens';
 import { TemplateTypes } from '../../templates/index';
 import * as templates from '../../templates/index';
 import { ConfigService } from '../config/config.service';
-import { DatabaseService } from '../database/database.service';
 import { MigrationsResolver } from '../migrations-resolver/migrations-resolver.service';
 
 @Injectable()
 export class MigrationService {
   constructor(
     private configService: ConfigService,
-    private database: DatabaseService,
     private migrationsResolver: MigrationsResolver,
     private logger: LogFactory,
   ) {}
 
   async connect() {
-    await this.database.mongooseConnect();
-    return this.database.connect();
+    return this.configService.config.database.connect();
   }
 
   async up() {
@@ -36,7 +33,6 @@ export class MigrationService {
     const migrated: ReturnType[] = [];
 
     const client = await this.connect();
-
     const logger = this.logger.getUpLogger();
     const typescriptMigrations = pendingItems
       .filter((item) => this.migrationsResolver.isTypescript(item.fileName))

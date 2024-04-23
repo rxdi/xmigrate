@@ -35,12 +35,8 @@ export interface BundlerConfig {
 }
 
 export interface Config {
-  mongodb: {
-    url: string;
-    databaseName: string;
-    options: {
-      useNewUrlParser: boolean;
-    };
+  database: {
+    connect?(): Promise<MongoClient>;
   };
   dateTimeFormat?: () => string;
   outDir: string;

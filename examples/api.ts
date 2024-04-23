@@ -1,12 +1,14 @@
 import { Container, setup } from '@rxdi/core';
+import { MongoClient } from 'mongodb';
+import { connect } from 'mongoose';
 
 import {
-  MigrationService,
+  Config,
+  ConfigService,
   GenericRunner,
   LogFactory,
-  ConfigService,
   LoggerConfig,
-  Config
+  MigrationService,
 } from '../src/index'; // equivalent to '@rxdi/xmigrate'
 
 const config = {
@@ -19,20 +21,22 @@ const config = {
     folder: './migrations-log',
     up: {
       success: 'up.success.log',
-      error: 'up.error.log'
+      error: 'up.error.log',
     },
     down: {
       success: 'down.success.log',
-      error: 'down.error.log'
-    }
+      error: 'down.error.log',
+    },
   },
-  mongodb: {
-    url: 'mongodb://localhost:27017',
-    databaseName: 'test',
-    options: {
-      useNewUrlParser: true
-    }
-  }
+  database: {
+    async connect() {
+      const url = 'mongodb://localhost:27017';
+
+      await connect(url);
+      const client = await MongoClient.connect(url);
+      return client;
+    },
+  },
 };
 
 setup({
@@ -42,13 +46,13 @@ setup({
     ConfigService,
     {
       provide: Config,
-      useValue: config
+      useValue: config,
     },
     {
       provide: LoggerConfig,
-      useValue: config.logger
-    }
-  ]
+      useValue: config.logger,
+    },
+  ],
 }).subscribe(async () => {
   const template = `
 import { MongoClient } from 'mongodb';
@@ -67,7 +71,7 @@ export async function down(client: MongoClient) {
   const filePath = await migrationService.createWithTemplate(
     template as 'typescript',
     'pesho1234',
-    { raw: true, typescript: true }
+    { raw: true, typescript: true },
   );
   console.log(filePath);
 
