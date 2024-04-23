@@ -22,7 +22,13 @@ export class MigrationService {
   ) {}
 
   async connect() {
-    return this.configService.config.database.connect();
+    if (this.configService.config.database._connection_cache) {
+      return this.configService.config.database._connection_cache;
+    }
+
+    this.configService.config.database._connection_cache = await this.configService.config.database.connect();
+
+    return this.configService.config.database._connection_cache;
   }
 
   async up() {

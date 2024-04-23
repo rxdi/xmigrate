@@ -36,6 +36,7 @@ export interface BundlerConfig {
 
 export interface Config {
   database: {
+    _connection_cache?: MongoClient;
     connect?(): Promise<MongoClient>;
   };
   dateTimeFormat?: () => string;
