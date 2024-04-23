@@ -33,7 +33,7 @@ chmod +x xmigrate-linux
 ```
 
 ```bash
-./xmigrate up|down|create
+./xmigrate up|down|create|status
 ```
 
 Using `NodeJS`
@@ -55,6 +55,9 @@ Manual configuration
 You can create a `xmigrate.js` file where you execute the `xmigrate` command:
 
 ```typescript
+import { MongoClient } from 'mongodb';
+import { connect } from 'mongoose';
+
 export default async () => {
   return {
     changelogCollectionName: 'migrations',
@@ -64,6 +67,9 @@ export default async () => {
     outDir: './.xmigrate',
     /* Custom datetime formatting can be applied like so */
     // dateTimeFormat: () => new Date().toISOString(),
+    /* If you do need some better bundling of your migrations when there are tsconfig paths namespaces @shared/my-namespace
+        You should consider using `bundler.build()` configuration.
+    */
     // bundler: {
     //   build(entryPoints: string[], outdir: string) {
     //     return esbuild.build({
@@ -90,11 +96,13 @@ export default async () => {
         error: 'down.error.log',
       },
     },
-    mongodb: {
-      url: `mongodb://localhost:27017`,
-      databaseName: 'test',
-      options: {
-        useNewUrlParser: true,
+    database: {
+      async connect() {
+        const url = 'mongodb://localhost:27017';
+
+        await connect(url);
+        const client = await MongoClient.connect(url);
+        return client;
       },
     },
   };
@@ -401,6 +409,8 @@ When you change your configuration file to `xmigrate.ts` it will automatically t
 
 ```typescript
 import { Config } from '@rxdi/xmigrate';
+import { MongoClient } from 'mongodb';
+import { connect } from 'mongoose';
 
 export default async (): Promise<Config> => {
   return {
@@ -435,11 +445,14 @@ export default async (): Promise<Config> => {
         error: 'down.error.log',
       },
     },
-    mongodb: {
-      url: `mongodb://localhost:27017`,
-      databaseName: 'test',
-      options: {
-        useNewUrlParser: true,
+    database: {
+      async connect() {
+        const url =
+          process.env.MONGODB_CONNECTION_STRING ?? 'mongodb://localhost:27017';
+
+        await connect(url);
+        const client = await MongoClient.connect(url);
+        return client;
       },
     },
   };
@@ -467,6 +480,8 @@ import {
   LoggerConfig,
   Config,
 } from '@rxdi/xmigrate';
+import { MongoClient } from 'mongodb';
+import { connect } from 'mongoose';
 
 const config = {
   changelogCollectionName: 'migrations',
@@ -485,11 +500,14 @@ const config = {
       error: 'down.error.log',
     },
   },
-  mongodb: {
-    url: 'mongodb://localhost:27017',
-    databaseName: 'test',
-    options: {
-      useNewUrlParser: true,
+  database: {
+    async connect() {
+      const url =
+        process.env.MONGODB_CONNECTION_STRING ?? 'mongodb://localhost:27017';
+
+      await connect(url);
+      const client = await MongoClient.connect(url);
+      return client;
     },
   },
 };

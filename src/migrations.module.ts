@@ -135,7 +135,9 @@ export class MigrationsModule {
                 settings = (await (settings as Function)()) as Config;
               }
               configService.set(settings as Config);
-            } catch (e) {}
+            } catch (e) {
+              console.error('Cannot load xmigrate configuration file', e);
+            }
             await ensureDir(configService.config.logger.folder);
             await ensureDir(configService.config.migrationsDir);
             let hasCrashed: boolean;

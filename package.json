@@ -45,7 +45,9 @@
     "jest": "^24.8.0",
     "prettier": "^2.0.4",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "mongodb": "3.3.3",
+    "mongoose": "5.7.6"
   },
   "peerDependencies": {
     "mongodb": "*",
