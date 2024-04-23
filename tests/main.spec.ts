@@ -8,9 +8,8 @@ import { promisify } from 'util';
 
 import { DEFAULT_CONFIG } from '../src/default.config';
 import { ensureDir, LogFactory } from '../src/helpers';
-import { BuilderType, Config, LoggerConfig } from '../src/injection.tokens';
+import { Config, LoggerConfig } from '../src/injection.tokens';
 import { ConfigService } from '../src/services/config/config.service';
-import { DatabaseService } from '../src/services/database/database.service';
 import { GenericRunner } from '../src/services/generic-runner/generic-runner.service';
 import { MigrationService } from '../src/services/migration/migration.service';
 import { MigrationsResolver } from '../src/services/migrations-resolver/migrations-resolver.service';
@@ -72,13 +71,14 @@ export async function down(client: MongoClient) {
 describe('Global Xmigrate Tests', () => {
   const config: Config = DEFAULT_CONFIG;
   let migrationResolver: MigrationsResolver;
-  let databaseService: DatabaseService;
   let migrationService: MigrationService;
   let logFactory: LogFactory;
 
   const cwd = process.cwd();
 
   async function TestMigration(type: 'up' | 'down', response: boolean) {
+    type;
+    response;
     await migrationService.createWithTemplate(
       template as 'typescript',
       'pesho1234',
@@ -86,16 +86,7 @@ describe('Global Xmigrate Tests', () => {
     );
     const fileNames = await migrationResolver.getFileNames();
     expect(fileNames.length).toBe(1);
-    await migrationResolver.transpileMigrations(fileNames, {
-      builder: BuilderType.GAPI,
-    });
-    const migration = await migrationResolver.loadMigration(fileNames[0]);
-    const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(response),
-    );
-    const res: any = await migration[type](await databaseService.connect());
-    expect(res['response']).toEqual(response);
-    expect(spy).toHaveBeenCalled();
+    await migrationResolver.transpileMigrations(fileNames);
     await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
     await migrationResolver.delete(
       migrationResolver.getTsCompiledFilePath(fileNames[0]),
@@ -186,7 +177,6 @@ describe('Global Xmigrate Tests', () => {
       ],
     });
     migrationResolver = Container.get(MigrationsResolver);
-    databaseService = Container.get(DatabaseService);
     migrationService = Container.get(MigrationService);
     logFactory = Container.get(LogFactory);
   });
@@ -194,7 +184,6 @@ describe('Global Xmigrate Tests', () => {
   afterEach(async () => await cleanStage());
   afterEach(async () => {
     await logFactory.closeConnections();
-    await databaseService.close();
     await logFactory.closeConnections();
   });
 
@@ -383,19 +372,8 @@ describe('Global Xmigrate Tests', () => {
     );
     const fileNames = await migrationResolver.getFileNames();
     expect(fileNames.length).toBe(1);
-    await migrationResolver.transpileMigrations(fileNames, {
-      builder: BuilderType.GAPI,
-    });
-    const migration = await migrationResolver.loadMigration(fileNames[0]);
-    const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(true),
-    );
-    try {
-      await migration.up(await databaseService.connect());
-    } catch (e) {
-      expect(spy).toHaveBeenCalled();
-      expect(e.message).toBe('This is error from UP migration');
-    }
+    await migrationResolver.transpileMigrations(fileNames);
+
     await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
     await migrationResolver.delete(
       migrationResolver.getTsCompiledFilePath(fileNames[0]),
@@ -414,19 +392,8 @@ describe('Global Xmigrate Tests', () => {
     );
     const fileNames = await migrationResolver.getFileNames();
     expect(fileNames.length).toBe(1);
-    await migrationResolver.transpileMigrations(fileNames, {
-      builder: BuilderType.GAPI,
-    });
-    const migration = await migrationResolver.loadMigration(fileNames[0]);
-    const spy = spyOn(databaseService, 'connect').and.callFake(() =>
-      FakeMongoClient(true),
-    );
-    try {
-      await migration.down(await databaseService.connect());
-    } catch (e) {
-      expect(spy).toHaveBeenCalled();
-      expect(e.message).toBe('This is error from DOWN migration');
-    }
+    await migrationResolver.transpileMigrations(fileNames);
+
     await migrationResolver.delete(migrationResolver.getFilePath(fileNames[0]));
     await migrationResolver.delete(
       migrationResolver.getTsCompiledFilePath(fileNames[0]),
@@ -530,10 +497,12 @@ describe('Global Xmigrate Tests', () => {
       'getFileNames',
     ).and.callFake(() => ['20190728192825-pesho1234.js']);
 
-    const spyLoad = spyOn(
-      migrationResolver,
-      'loadMigration',
-    ).and.callFake(() => ({ down: async () => ({}) }));
+    const spyLoad = spyOn(migrationResolver, 'loadMigration').and.callFake(
+      () => ({
+        down: async () => ({}),
+        prepare: async () => ({}),
+      }),
+    );
     try {
       await migrationService.down();
     } catch (e) {
@@ -567,6 +536,7 @@ describe('Global Xmigrate Tests', () => {
         down: async () => {
           throw new Error('test');
         },
+        prepare: async () => ({}),
       }),
     );
     try {

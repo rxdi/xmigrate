@@ -4,7 +4,7 @@ import { promisify } from 'util';
 
 import { Config, LoggerConfig } from '../injection.tokens';
 import { includes, nextOrDefault } from './args-extractors';
-import { LogFactory } from './log-factory';
+import { LogFactory, Logger } from './log-factory';
 
 const config = {
   changelogCollectionName: 'migrations',
@@ -23,7 +23,7 @@ const config = {
       error: 'down.error.log',
     },
   },
-  mongodb: {
+  database: {
     url: `mongodb://localhost:27017`,
     databaseName: 'test',
     options: {
@@ -135,7 +135,7 @@ describe('Helpers', () => {
     const log = logFactory.create('pesho', {
       errorPath: './test.error.log',
       successPath: './test.succes.log',
-    });
+    }) as Logger;
     await log.error('omg');
     log.successFinished = true;
     await log.log('omg');

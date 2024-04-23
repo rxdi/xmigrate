@@ -5,6 +5,21 @@ export default `module.exports = async () => {
     defaultTemplate: 'es6',
     outDir: './.xmigrate',
     typescript: true,
+    // bundler: {
+    //   build(entryPoints: string[], outdir: string) {
+    //     return esbuild.build({
+    //       entryPoints,
+    //       bundle: true,
+    //       sourcemap: false,
+    //       minify: false,
+    //       platform: 'node',
+    //       format: 'cjs',
+    //       outdir,
+    //       logLevel: 'info',
+    //       plugins: [pluginTsc()],
+    //     })
+    //   },
+    // },
     logger: {
       folder: './migrations-log',
       up: {
@@ -16,12 +31,15 @@ export default `module.exports = async () => {
         error: 'down.error.log'
       }
     },
-    mongodb: {
-      url: 'mongodb://localhost:27017',
-      databaseName: 'test',
-      options: {
-        useNewUrlParser: true
-      }
+    database: {
+      async connect() {
+        const url =
+          process.env.MONGODB_CONNECTION_STRING ?? 'mongodb://localhost:27017'
+
+        await connect(url)
+        const client = await MongoClient.connect(url)
+        return client
+      },
     },
   };
 };

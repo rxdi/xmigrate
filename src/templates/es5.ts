@@ -1,10 +1,13 @@
 export default `
 module.exports = {
-  async up (client) {
+  async prepare (client) {
+    return [client]
+  },
+  async up ([client]) {
     return ['Up']
   },
 
-  async down (client) {
+  async down ([client]) {
     return ['Down']
   }
 }

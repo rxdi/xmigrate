@@ -13,8 +13,9 @@ export interface ReturnType {
 export const LoggerConfig = new InjectionToken('logger-config');
 export const Config = new InjectionToken('migrations-config');
 export type MigrationSchema = {
-  down: (db: MongoClient) => unknown;
-  up: (db: MongoClient) => unknown;
+  down: (options: Record<any, any>) => unknown;
+  up: (options: Record<any, any>) => unknown;
+  prepare: (db: MongoClient) => Promise<any>;
 };
 
 export interface LoggerConfig {
@@ -29,18 +30,13 @@ export interface LoggerConfig {
   };
 }
 
-export enum BuilderType {
-  ESBUILD = 'ESBUILD',
-  GAPI = 'GAPI',
+export interface BundlerConfig {
+  build(entryPoints: string[], outdir: string): Promise<void>;
 }
 
 export interface Config {
-  mongodb: {
-    url: string;
-    databaseName: string;
-    options: {
-      useNewUrlParser: boolean;
-    };
+  database: {
+    connect?(): Promise<MongoClient>;
   };
   dateTimeFormat?: () => string;
   outDir: string;
@@ -49,7 +45,7 @@ export interface Config {
   logger?: LoggerConfig;
   defaultTemplate?: TemplateTypes;
   typescript?: boolean;
-  builder?: BuilderType;
+  bundler?: BundlerConfig;
 }
 
 export type Tasks =

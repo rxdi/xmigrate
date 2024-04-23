@@ -1,4 +1,4 @@
-import { BuilderType, Config } from './injection.tokens';
+import { Config } from './injection.tokens';
 
 export const DEFAULT_CONFIG: Config = {
   changelogCollectionName: 'migrations',
@@ -6,7 +6,9 @@ export const DEFAULT_CONFIG: Config = {
   defaultTemplate: 'es6',
   typescript: true,
   outDir: './.xmigrate',
-  builder: BuilderType.ESBUILD,
+  // bundler: {
+  //   build: () => Promise.resolve(),
+  // },
   // dateTimeFormat: () => '1212',
   logger: {
     folder: './migrations-log',
@@ -19,11 +21,5 @@ export const DEFAULT_CONFIG: Config = {
       error: 'down.error.log',
     },
   },
-  mongodb: {
-    url: 'mongodb://localhost:27017',
-    databaseName: 'test',
-    options: {
-      useNewUrlParser: true,
-    },
-  },
+  database: {},
 };
