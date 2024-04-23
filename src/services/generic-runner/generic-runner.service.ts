@@ -118,11 +118,15 @@ export class GenericRunner {
 
   private async logEnvironment(taskName: string) {
     const {
+      database: { _connection_cache },
       migrationsDir,
       logger: { folder },
       changelogCollectionName,
     } = this.configService.config;
     console.log(`
+    \n🖥️  ${chalk.bold('Database:')} ${chalk.blue.bold(
+      _connection_cache.db().databaseName,
+    )}
     \n💿  ${chalk.bold('DBCollection:')} ${chalk.blue.bold(
       changelogCollectionName,
     )}

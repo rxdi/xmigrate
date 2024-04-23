@@ -36,6 +36,7 @@ export interface BundlerConfig {
 
 export interface Config {
   database: {
+    _database_name?: string;
     _connection_cache?: MongoClient;
     connect?(): Promise<MongoClient>;
   };

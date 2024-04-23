@@ -68,11 +68,17 @@ export class MigrationsModule {
         },
         {
           provide: 'start',
-          deps: [CommandInjector, GenericRunner, ConfigService],
+          deps: [
+            CommandInjector,
+            GenericRunner,
+            ConfigService,
+            MigrationService,
+          ],
           useFactory: async (
             { command, argv }: { command: Tasks; argv: unknown[] },
             runner: GenericRunner,
             configService: ConfigService,
+            migrationService: MigrationService,
           ) => {
             try {
               let settings;
@@ -141,6 +147,9 @@ export class MigrationsModule {
             await ensureDir(configService.config.logger.folder);
             await ensureDir(configService.config.migrationsDir);
             let hasCrashed: boolean;
+
+            await migrationService.connect();
+
             if (command === 'create') {
               hasCrashed = await runner.run('create', {
                 name: argv[1],
