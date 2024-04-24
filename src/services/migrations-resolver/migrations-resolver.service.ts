@@ -100,6 +100,6 @@ export class MigrationsResolver {
   }
 
   replaceFilenameJsWithTs(fileName: string) {
-    return fileName.replace('ts', 'js');
+    return fileName.replace('.ts', '.js');
   }
 }
