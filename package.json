@@ -21,7 +21,7 @@
     "xmigrate": "./dist/main.js"
   },
   "dependencies": {
-    "@rxdi/core": "^0.7.178",
+    "@rxdi/core": "^0.7.180",
     "chalk": "2.4.2",
     "esbuild": "^0.20.2",
     "esm": "3.2.25"
