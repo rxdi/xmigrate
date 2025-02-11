@@ -95,9 +95,11 @@ export class GenericRunner {
     } else {
       migration = require(migrationPath);
     }
-    response.result = await migration.down(
-      await this.migrationService.connect(),
-    );
+    const client = await this.migrationService.connect();
+
+    const prepare = await migration.prepare(client);
+
+    response.result = await migration.down(prepare);
     response.appliedAt = new Date();
     console.log(
       `\n🚀  ${chalk.green(
